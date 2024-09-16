@@ -1,0 +1,75 @@
+package cn.yessoft.umsj.moduler.base.entity;
+
+import cn.yessoft.umsj.mybatis.core.entity.BaseDO;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Getter;
+import lombok.Setter;
+
+/**
+ * <p>
+ * 菜单及功能表
+ * </p>
+ *
+ * @author ethan
+ * @since 2024-08-31
+ */
+@Getter
+@Setter
+@TableName("base_menu")
+public class BaseMenuDO extends BaseDO {
+
+    private static final long serialVersionUID = 1L;
+
+    /**
+     * ID
+     */
+    @TableId(value = "id", type = IdType.AUTO)
+    private Long id;
+
+    /**
+     * 路由路径
+     */
+    private String path;
+
+    /**
+     * 名称
+     */
+    private String name;
+
+    /**
+     * 权限值
+     */
+    private String permission;
+
+    /**
+     * 菜单类型
+     */
+    private Integer type;
+
+    /**
+     * 上级菜单id
+     */
+    private Long parentId;
+
+    /**
+     * 启用停用
+     */
+    private Integer enable;
+
+    /**
+     * 图标
+     */
+    private String icon;
+
+    /**
+     * 顺序
+     */
+    private Integer seq;
+
+    /**
+     * 语言包名
+     */
+    private String locale;
+}

@@ -1,0 +1,64 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>cn.yes-soft</groupId>
+        <artifactId>umsj</artifactId>
+        <version>${revision}</version>
+    </parent>
+    <artifactId>umsj-moduler-base</artifactId>
+    <packaging>jar</packaging>
+
+    <dependencies>
+        <dependency>
+            <groupId>cn.yes-soft</groupId>
+            <artifactId>umsj-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>cn.yes-soft</groupId>
+            <artifactId>umsj-spring-boot-starter-security</artifactId>
+        </dependency>
+        <!-- web 相关 -->
+        <dependency>
+            <groupId>cn.yes-soft</groupId>
+            <artifactId>umsj-spring-boot-starter-web</artifactId>
+        </dependency>
+        <!-- db 相关 -->
+        <dependency>
+            <groupId>cn.yes-soft</groupId>
+            <artifactId>umsj-spring-boot-starter-mybatis</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+
+        <!-- 工具类相关 -->
+        <dependency>
+            <groupId>jakarta.validation</groupId>
+            <artifactId>jakarta.validation-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.tika</groupId>
+            <artifactId>tika-core</artifactId> <!-- 文件类型的识别 -->
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>transmittable-thread-local</artifactId> <!-- 解决 ThreadLocal 父子线程的传值问题 -->
+        </dependency>
+        <!-- 三方云相关 -->
+        <dependency>
+            <groupId>io.minio</groupId>
+            <artifactId>minio</artifactId>
+        </dependency>
+    </dependencies>
+</project>

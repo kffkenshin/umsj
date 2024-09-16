@@ -1,0 +1,30 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>cn.yes-soft</groupId>
+        <artifactId>umsj</artifactId>
+        <version>${revision}</version>
+    </parent>
+
+    <artifactId>umsj-framework</artifactId>
+    <packaging>pom</packaging>
+
+    <name>umsj-framework</name>
+    <url>http://yes-soft.cn</url>
+    <modules>
+        <module>umsj-spring-boot-starter-web</module>
+        <module>umsj-spring-boot-starter-mybatis</module>
+        <module>umsj-spring-boot-starter-security</module>
+        <module>umsj-common</module>
+    </modules>
+
+
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+</project>

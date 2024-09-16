@@ -1,0 +1,200 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>cn.yes-soft</groupId>
+    <artifactId>umsj</artifactId>
+    <version>${revision}</version>
+    <packaging>pom</packaging>
+
+    <name>${project.artifactId}</name>
+    <url>https://yes-soft.cn</url>
+    <description>UMSJ项目基础脚手架</description>
+    <modules>
+        <module>umsj-framework</module>
+        <module>umsj-gencode</module>
+        <module>umsj-moduler-base</module>
+        <module>umsj-moduler-xinhefa</module>
+    </modules>
+
+    <properties>
+        <revision>0.0.1-snapshot</revision>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <java.version>17</java.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+        <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
+        <!-- Spring 相关 -->
+        <spring.boot.version>3.2.2</spring.boot.version>
+        <!-- DB 相关 -->
+        <mybatis-plus.version>3.5.6</mybatis-plus.version>
+        <mybatis-spring.version>3.0.3</mybatis-spring.version>
+        <mysql-connector-j.version>8.4.0</mysql-connector-j.version>
+        <mybatis-plus-join.version>1.4.13</mybatis-plus-join.version>
+        <!-- 代码生成 相关 -->
+        <mybatis-plus-generator.version>3.5.6</mybatis-plus-generator.version>
+        <velocity-engine-core.version>2.3</velocity-engine-core.version>
+        <lombok.version>1.18.34</lombok.version>
+        <!-- 工具 相关 -->
+        <hutool-5.version>5.8.29</hutool-5.version>
+        <guava.version>33.2.1-jre</guava.version>
+        <tika-core.version>2.9.2</tika-core.version>
+        <transmittable-thread-local.version>2.14.5</transmittable-thread-local.version>
+        <!-- VO 数据翻译 -->
+        <easy-trans.version>3.0.5</easy-trans.version>
+        <!-- 三方云相关 -->
+        <minio.version>8.5.7</minio.version>
+
+
+    </properties>
+    <dependencyManagement>
+        <dependencies>
+            <!-- 统一依赖管理 -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring.boot.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <!-- 用于生成自定义的 Spring @ConfigurationProperties 配置类的说明文件 -->
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-configuration-processor</artifactId>
+                <version>${spring.boot.version}</version>
+            </dependency>
+            <!-- DB 相关 -->
+            <dependency>
+                <groupId>cn.yes-soft</groupId>
+                <artifactId>umsj-common</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.yes-soft</groupId>
+                <artifactId>umsj-framework</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <!-- Web 相关 -->
+            <dependency>
+                <groupId>cn.yes-soft</groupId>
+                <artifactId>umsj-spring-boot-starter-web</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.yes-soft</groupId>
+                <artifactId>umsj-spring-boot-starter-security</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <!-- DB 相关 -->
+            <dependency>
+                <groupId>org.mybatis</groupId>
+                <artifactId>mybatis-spring</artifactId>
+                <version>${mybatis-spring.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>cn.yes-soft</groupId>
+                <artifactId>umsj-spring-boot-starter-mybatis</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-boot-starter</artifactId>
+                <version>${mybatis-plus.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.mysql</groupId>
+                <artifactId>mysql-connector-j</artifactId>
+                <version>${mysql-connector-j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.yulichang</groupId>
+                <artifactId>mybatis-plus-join-boot-starter</artifactId> <!-- MyBatis 联表查询 -->
+                <version>${mybatis-plus-join.version}</version>
+            </dependency>
+            <!-- 代码生成 相关 -->
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-generator</artifactId>
+                <version>${mybatis-plus-generator.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.velocity</groupId>
+                <artifactId>velocity-engine-core</artifactId>
+                <version>${velocity-engine-core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${lombok.version}</version>
+            </dependency>
+            <!-- 工具 相关 -->
+            <dependency>
+                <groupId>cn.hutool</groupId>
+                <artifactId>hutool-all</artifactId>
+                <version>${hutool-5.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fhs-opensource</groupId> <!-- VO 数据翻译 -->
+                <artifactId>easy-trans-spring-boot-starter</artifactId>
+                <version>${easy-trans.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.springframework</groupId>
+                        <artifactId>spring-context</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.springframework.cloud</groupId>
+                        <artifactId>spring-cloud-commons</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>com.fhs-opensource</groupId>
+                <artifactId>easy-trans-mybatis-plus-extend</artifactId>
+                <version>${easy-trans.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fhs-opensource</groupId>
+                <artifactId>easy-trans-anno</artifactId>
+                <version>${easy-trans.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tika</groupId>
+                <artifactId>tika-core</artifactId> <!-- 文件类型的识别 -->
+                <version>${tika-core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>transmittable-thread-local</artifactId> <!-- 解决 ThreadLocal 父子线程的传值问题 -->
+                <version>${transmittable-thread-local.version}</version>
+            </dependency>
+            <!-- 三方云相关 -->
+            <dependency>
+                <groupId>io.minio</groupId>
+                <artifactId>minio</artifactId>
+                <version>${minio.version}</version>
+            </dependency>
+        </dependencies>
+
+    </dependencyManagement>
+
+    <!-- 使用 huawei / aliyun 的 Maven 源，提升下载速度 -->
+    <repositories>
+        <repository>
+            <id>huaweicloud</id>
+            <name>huawei</name>
+            <url>https://mirrors.huaweicloud.com/repository/maven/</url>
+        </repository>
+        <repository>
+            <id>aliyunmaven</id>
+            <name>aliyun</name>
+            <url>https://maven.aliyun.com/nexus/content/groups/public/</url>
+        </repository>
+    </repositories>
+</project>
+

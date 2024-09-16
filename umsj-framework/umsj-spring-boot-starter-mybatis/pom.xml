@@ -1,0 +1,65 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>cn.yes-soft</groupId>
+        <artifactId>umsj-framework</artifactId>
+        <version>${revision}</version>
+    </parent>
+    <artifactId>umsj-spring-boot-starter-mybatis</artifactId>
+    <packaging>jar</packaging>
+    <name>umsj-spring-boot-starter-mybatis</name>
+    <description>数据库连接池、多数据源、事务、MyBatis 拓展</description>
+
+    <dependencies>
+        <!-- DB 相关 -->
+        <dependency>
+            <groupId>org.mybatis</groupId>
+            <artifactId>mybatis-spring</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-boot-starter</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.mybatis</groupId>
+                    <artifactId>mybatis-spring</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.yulichang</groupId>
+            <artifactId>mybatis-plus-join-boot-starter</artifactId> <!-- MyBatis 联表查询 -->
+        </dependency>
+        <dependency>
+            <groupId>cn.yes-soft</groupId>
+            <artifactId>umsj-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+        </dependency>
+
+        <!-- VO 数据翻译 -->
+        <dependency>
+            <groupId>com.fhs-opensource</groupId>
+            <artifactId>easy-trans-spring-boot-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fhs-opensource</groupId>
+            <artifactId>easy-trans-mybatis-plus-extend</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>cn.yes-soft</groupId>
+            <artifactId>umsj-spring-boot-starter-web</artifactId>
+        </dependency>
+    </dependencies>
+</project>
