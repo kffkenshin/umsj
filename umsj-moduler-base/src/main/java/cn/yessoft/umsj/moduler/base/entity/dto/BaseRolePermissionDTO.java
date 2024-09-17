@@ -19,6 +19,8 @@ public class BaseRolePermissionDTO {
      */
     private String permission;
 
+    private String locale;
+
     /**
      * 菜单类型
      */

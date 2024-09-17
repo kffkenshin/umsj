@@ -8,11 +8,11 @@ spring:
     name: umsj-base-server
   # 数据源配置项
   datasource:
-    name: yesee
-    url: jdbc:mysql://193.112.99.130:3806/${spring.datasource.name}?characterEncoding=UTF-8
+    name: baozuosaoee
+    url: jdbc:mysql://mysql.yes-soft.cn:3306/${spring.datasource.name}?characterEncoding=UTF-8
     driver-class-name: com.mysql.cj.jdbc.Driver
-    username: ums
-    password: Txy!Db16:28
+    username: root
+    password: Msq#Hwy0817
     hikari:
       connection-timeout: 60000
       validation-timeout: 3000

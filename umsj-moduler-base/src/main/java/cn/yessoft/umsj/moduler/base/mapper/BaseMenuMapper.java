@@ -40,6 +40,7 @@ public interface BaseMenuMapper extends YesBaseMapper<BaseMenuDO> {
         query.selectAs("t.name", BaseRolePermissionDTO::getName);
         query.selectAs("t.permission", BaseRolePermissionDTO::getPermission);
         query.selectAs("t.type", BaseRolePermissionDTO::getType);
+        query.selectAs("t.locale", BaseRolePermissionDTO::getLocale);
         query.selectAs("t.icon", BaseRolePermissionDTO::getIcon);
         query.selectAs("rp.role_id", BaseRolePermissionDTO::getRoleId);
         query.leftJoin(BaseRolePermissionDO.class, "rp", on -> on.eq(BaseRolePermissionDO::getPermission, BaseMenuDO::getPermission)

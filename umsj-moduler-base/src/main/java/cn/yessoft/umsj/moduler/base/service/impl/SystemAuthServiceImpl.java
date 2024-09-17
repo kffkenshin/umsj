@@ -9,6 +9,7 @@ import cn.yessoft.umsj.moduler.base.enums.LoginLogTypeEnum;
 import cn.yessoft.umsj.moduler.base.service.IBaseAccessTokenService;
 import cn.yessoft.umsj.moduler.base.service.IBaseAccountService;
 import cn.yessoft.umsj.moduler.base.service.ISystemAuthService;
+import cn.yessoft.umsj.security.core.util.SecurityFrameworkUtils;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -75,6 +76,7 @@ public class SystemAuthServiceImpl implements ISystemAuthService {
     public void logout(String token) {
         // 删除访问令牌
         BaseAccessTokenDO baseAccessToken = baseAccessTokenService.removeAccessToken(token);
+        SecurityFrameworkUtils.logout();
         if (baseAccessToken == null) {
             return;
         }
