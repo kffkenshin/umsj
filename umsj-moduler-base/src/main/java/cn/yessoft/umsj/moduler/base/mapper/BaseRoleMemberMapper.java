@@ -1,8 +1,12 @@
 package cn.yessoft.umsj.moduler.base.mapper;
 
+import cn.yessoft.umsj.moduler.base.entity.BaseAccountDO;
 import cn.yessoft.umsj.moduler.base.entity.BaseRoleMemberDO;
+import cn.yessoft.umsj.moduler.base.entity.dto.IdAndNameDTO;
+import cn.yessoft.umsj.moduler.base.enums.RoleTpyeEnum;
 import cn.yessoft.umsj.mybatis.core.mapper.YesBaseMapper;
 import cn.yessoft.umsj.mybatis.core.query.LambdaQueryWrapperX;
+import cn.yessoft.umsj.mybatis.core.query.MPJLambdaWrapperX;
 
 import java.util.List;
 
@@ -24,5 +28,15 @@ public interface BaseRoleMemberMapper extends YesBaseMapper<BaseRoleMemberDO> {
         return selectObjs(q);
     }
 
-    ;
+    default List<IdAndNameDTO> listRoleAccount(Long roleId) {
+        MPJLambdaWrapperX<BaseRoleMemberDO> query = new MPJLambdaWrapperX<BaseRoleMemberDO>();
+        query.selectAs("account.nick_name", IdAndNameDTO::getName);
+        query.selectAs("account.id", IdAndNameDTO::getId);
+        query.leftJoin(BaseAccountDO.class, "account", BaseAccountDO::getId, BaseRoleMemberDO::getMemberId);
+        query.eq(BaseRoleMemberDO::getType, RoleTpyeEnum.ACCOUNT.getValue());
+        query.eq(BaseRoleMemberDO::getRoleId, roleId);
+        return selectJoinList(IdAndNameDTO.class, query);
+    }
+
+    ;;
 }

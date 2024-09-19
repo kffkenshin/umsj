@@ -8,6 +8,6 @@ public class RoleQueryReqVO extends PageParam {
 
     private String info;
 
-    private Integer roleId;
+    private Long roleId;
 
 }

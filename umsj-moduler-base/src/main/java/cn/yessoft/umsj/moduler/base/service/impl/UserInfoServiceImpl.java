@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.io.InputStream;
 import java.util.List;
@@ -98,6 +99,10 @@ public class UserInfoServiceImpl implements IUserInfoService {
     @Override
     public List<UserMenuDTO> getUserMenu() {
         Set<String> permissions = SecurityFrameworkUtils.getLoginUserPermissions();
+        // 没权限的话 给个值
+        if (CollectionUtils.isEmpty(permissions)) {
+            permissions.add("WE#@%522polPPs");
+        }
         return baseMenuService.getMenuByPermissions(permissions, BaseConstants.ROOT_MENU_ID);
     }
 

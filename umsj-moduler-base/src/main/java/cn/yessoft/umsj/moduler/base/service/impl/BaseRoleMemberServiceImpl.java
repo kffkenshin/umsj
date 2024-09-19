@@ -5,6 +5,7 @@ import cn.yessoft.umsj.common.pojo.PageResult;
 import cn.yessoft.umsj.moduler.base.controller.vo.role.RoleMemberCreateVO;
 import cn.yessoft.umsj.moduler.base.controller.vo.role.RoleQueryReqVO;
 import cn.yessoft.umsj.moduler.base.entity.BaseRoleMemberDO;
+import cn.yessoft.umsj.moduler.base.entity.dto.IdAndNameDTO;
 import cn.yessoft.umsj.moduler.base.enums.RoleTpyeEnum;
 import cn.yessoft.umsj.moduler.base.mapper.BaseRoleMemberMapper;
 import cn.yessoft.umsj.moduler.base.service.IBaseRoleMemberService;
@@ -93,5 +94,10 @@ public class BaseRoleMemberServiceImpl extends ServiceImpl<BaseRoleMemberMapper,
             }
         });
         return selectedIds;
+    }
+
+    @Override
+    public List<IdAndNameDTO> listRoleAccount(Long roleId) {
+        return baseRoleMemberMapper.listRoleAccount(roleId);
     }
 }

@@ -11,8 +11,8 @@ public class CodeGenerator {
      * 数据源配置
      */
     private static final DataSourceConfig DATA_SOURCE_CONFIG = new DataSourceConfig
-            .Builder("jdbc:mysql://193.112.99.130:3806/yesee?serverTimezone=Asia/Shanghai", "ums", "Txy!Db16:28")
-            .schema("yesee")
+            .Builder("jdbc:mysql://localhost:3306/umsj?serverTimezone=Asia/Shanghai", "root", "root")
+            .schema("umsj")
             .build();
 
     /**
@@ -39,7 +39,7 @@ public class CodeGenerator {
     public static void main(String[] args) {
         String[] ignoreColumns = {"creator", "create_time", "update_time", "updater"};
         AutoGenerator generator = new AutoGenerator(DATA_SOURCE_CONFIG);
-        generator.strategy(strategyConfig().addInclude("xhf_customer_auth")
+        generator.strategy(strategyConfig().addInclude("xhf_item")
                 .controllerBuilder().enableRestStyle()
                 .entityBuilder().superClass("cn.yessoft.umsj.mybatis.core.entity.BaseDO").enableLombok().addIgnoreColumns(ignoreColumns).formatFileName("%sDO")
                 .mapperBuilder().superClass("cn.yessoft.umsj.mybatis.core.mapper.YesBaseMapper")

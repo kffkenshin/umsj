@@ -4,6 +4,7 @@ import cn.yessoft.umsj.common.pojo.PageResult;
 import cn.yessoft.umsj.moduler.base.controller.vo.role.RoleMemberCreateVO;
 import cn.yessoft.umsj.moduler.base.controller.vo.role.RoleQueryReqVO;
 import cn.yessoft.umsj.moduler.base.entity.BaseRoleMemberDO;
+import cn.yessoft.umsj.moduler.base.entity.dto.IdAndNameDTO;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
@@ -32,4 +33,6 @@ public interface IBaseRoleMemberService extends IService<BaseRoleMemberDO> {
     List<Long> getRoleIdByAccountId(Long accountID);
 
     Set<Long> getAllByRoleId(Long roleId, Set<Long> selectedIds);
+
+    List<IdAndNameDTO> listRoleAccount(Long roleId);
 }

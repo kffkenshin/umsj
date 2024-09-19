@@ -6,4 +6,5 @@ import lombok.Data;
 @Data
 public class CustomerQueryReqVO extends PageParam {
     private String info;
+    private Long customerId;
 }

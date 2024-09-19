@@ -9,6 +9,7 @@ import cn.yessoft.umsj.moduler.base.controller.vo.role.RoleQueryReqVO;
 import cn.yessoft.umsj.moduler.base.controller.vo.role.RoleRespVO;
 import cn.yessoft.umsj.moduler.base.entity.BaseRoleDO;
 import cn.yessoft.umsj.moduler.base.entity.BaseRoleMemberDO;
+import cn.yessoft.umsj.moduler.base.entity.dto.IdAndNameDTO;
 import cn.yessoft.umsj.moduler.base.service.IBaseRoleMemberService;
 import cn.yessoft.umsj.moduler.base.service.IBaseRoleService;
 import jakarta.annotation.Resource;
@@ -97,5 +98,11 @@ public class BaseRoleController {
     public ApiResult<RoleMemberRespVO> getMember(@RequestParam("id") Long id) {
         BaseRoleMemberDO r = baseRoleMemberService.validateExist(id);
         return success(BeanUtils.toBean(r, RoleMemberRespVO.class));
+    }
+
+    @PostMapping("/list-roll-account")
+    public ApiResult<List<IdAndNameDTO>> listRoleAccount(@Valid @RequestBody RoleQueryReqVO reqVO) {
+        List<IdAndNameDTO> r = baseRoleMemberService.listRoleAccount(reqVO.getRoleId());
+        return success(r);
     }
 }

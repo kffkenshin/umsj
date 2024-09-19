@@ -4,7 +4,6 @@ import cn.yessoft.umsj.mybatis.core.entity.BaseDO;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import java.io.Serializable;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -42,7 +41,7 @@ public class XhfCustomerAuthDO extends BaseDO {
     /**
      * 产品类型
      */
-    private String itemTypeIds;
+    private String itemTypes;
 
     /**
      * 角色ID
