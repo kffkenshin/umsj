@@ -24,6 +24,6 @@ public enum XHFCusMatchStrategyEnum {
     private final String name;
 
     public static XHFCusMatchStrategyEnum valueOf(Integer value) {
-        return ArrayUtil.firstMatch(userType -> userType.getStrategy().equals(value), XHFCusMatchStrategyEnum.values());
+        return ArrayUtil.firstMatch(e -> e.getStrategy().equals(value), XHFCusMatchStrategyEnum.values());
     }
 }

@@ -1,5 +1,6 @@
 package cn.yessoft.umsj.moduler.xinhefa.enums;
 
+import cn.hutool.core.util.ArrayUtil;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -18,10 +19,14 @@ public enum XHFWorkStationEnum {
     KM(600, "刻码"),
     ZDX(850, "制袋线"),
     ZDJ(900, "制袋机"),
+    CM(2000, "吹膜"),
     ;
 
     private final Integer code;
 
     private final String name;
 
+    public static XHFWorkStationEnum valueOf(Integer value) {
+        return ArrayUtil.firstMatch(e -> e.getCode().equals(value), XHFWorkStationEnum.values());
+    }
 }

@@ -39,7 +39,7 @@ public class CodeGenerator {
     public static void main(String[] args) {
         String[] ignoreColumns = {"creator", "create_time", "update_time", "updater"};
         AutoGenerator generator = new AutoGenerator(DATA_SOURCE_CONFIG);
-        generator.strategy(strategyConfig().addInclude("xhf_item")
+        generator.strategy(strategyConfig().addInclude("xhf_product_process")
                 .controllerBuilder().enableRestStyle()
                 .entityBuilder().superClass("cn.yessoft.umsj.mybatis.core.entity.BaseDO").enableLombok().addIgnoreColumns(ignoreColumns).formatFileName("%sDO")
                 .mapperBuilder().superClass("cn.yessoft.umsj.mybatis.core.mapper.YesBaseMapper")

@@ -55,6 +55,11 @@
             <artifactId>hutool-all</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+        </dependency>
+        <!-- base包 -->
+        <dependency>
             <groupId>cn.yes-soft</groupId>
             <artifactId>umsj-moduler-base</artifactId>
             <version>0.0.1-snapshot</version>

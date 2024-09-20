@@ -1,11 +1,6 @@
-package cn.yessoft.umsj.moduler.xinhefa.entity;
+package cn.yessoft.umsj.moduler.xinhefa.controller.vo.maindata;
 
-import cn.yessoft.umsj.mybatis.core.entity.BaseDO;
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
 import java.math.BigDecimal;
 
@@ -17,17 +12,10 @@ import java.math.BigDecimal;
  * @author ethan
  * @since 2024-09-19
  */
-@Getter
-@Setter
-@TableName("xhf_item")
-public class XhfItemDO extends BaseDO {
+@Data
+public class ItemVO {
 
-    private static final long serialVersionUID = 1L;
 
-    /**
-     * ID
-     */
-    @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
     /**
@@ -174,9 +162,7 @@ public class XhfItemDO extends BaseDO {
      * 长度
      */
     private Short length;
-    /**
-     * 工艺路线备注
-     */
-    private String processRemark;
 
+
+    private String processRemark;
 }
