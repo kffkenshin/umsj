@@ -59,6 +59,8 @@
     <file url="file://$PROJECT_DIR$/umsj-framework/umsj-common/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/umsj-framework/umsj-spring-boot-starter-mybatis/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/umsj-framework/umsj-spring-boot-starter-mybatis/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/umsj-framework/umsj-spring-boot-starter-quartz/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/umsj-framework/umsj-spring-boot-starter-quartz/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/umsj-framework/umsj-spring-boot-starter-security/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/umsj-framework/umsj-spring-boot-starter-security/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/umsj-framework/umsj-spring-boot-starter-web/src/main/java" charset="UTF-8" />

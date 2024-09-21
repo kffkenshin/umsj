@@ -18,6 +18,11 @@
             <groupId>cn.yes-soft</groupId>
             <artifactId>umsj-spring-boot-starter-security</artifactId>
         </dependency>
+        <dependency>
+            <groupId>cn.yes-soft</groupId>
+            <artifactId>umsj-spring-boot-starter-quartz</artifactId>
+            <version>0.0.1-snapshot</version>
+        </dependency>
         <!-- web 相关 -->
         <dependency>
             <groupId>cn.yes-soft</groupId>
