@@ -2,6 +2,7 @@ package cn.yessoft.umsj.moduler.base.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.io.IoUtil;
+import cn.yessoft.umsj.common.utils.BaseUtils;
 import cn.yessoft.umsj.moduler.base.controller.vo.ChangePwdReqVO;
 import cn.yessoft.umsj.moduler.base.controller.vo.UpdateUserInfoReqVO;
 import cn.yessoft.umsj.moduler.base.controller.vo.UserInfoRespVO;
@@ -18,7 +19,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 import java.io.InputStream;
 import java.util.List;
@@ -100,7 +100,7 @@ public class UserInfoServiceImpl implements IUserInfoService {
     public List<UserMenuDTO> getUserMenu() {
         Set<String> permissions = SecurityFrameworkUtils.getLoginUserPermissions();
         // 没权限的话 给个值
-        if (CollectionUtils.isEmpty(permissions)) {
+        if (BaseUtils.isEmpty(permissions)) {
             permissions.add("WE#@%522polPPs");
         }
         return baseMenuService.getMenuByPermissions(permissions, BaseConstants.ROOT_MENU_ID);

@@ -166,7 +166,7 @@ public class BaseUtils {
     }
 
     public static Long objtolong(Object obj) {
-        return objtolong(obj, 0l);
+        return objtolong(obj, 0L);
     }
 
     public static Long objtolong(Object obj, Long iter) {
@@ -178,7 +178,7 @@ public class BaseUtils {
     }
 
     public static Double objToDouble(Object obj) {
-        return objToDouble(obj, (double) 0l);
+        return objToDouble(obj, (double) 0L);
     }
 
     public static Double objToDoubleHasNull(Object obj) {
