@@ -12,9 +12,11 @@ import cn.yessoft.umsj.moduler.base.service.IBaseJobService;
 import cn.yessoft.umsj.quartz.core.handler.JobHandler;
 import cn.yessoft.umsj.quartz.core.scheduler.SchedulerManager;
 import cn.yessoft.umsj.quartz.core.util.CronUtils;
+import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.SchedulerException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -42,6 +44,16 @@ public class BaseJobServiceImpl implements IBaseJobService {
 
     @Resource
     private SchedulerManager schedulerManager;
+
+    @Value("${yesee.base.job-scheduler}")
+    private String JOB_SCHEDULER;
+
+    @PostConstruct
+    void init() throws SchedulerException {
+        if ("ON".equals(JOB_SCHEDULER)) {
+            syncJob();
+        }
+    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)

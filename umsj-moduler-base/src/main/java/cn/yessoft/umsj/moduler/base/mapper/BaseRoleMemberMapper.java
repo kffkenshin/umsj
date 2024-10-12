@@ -38,5 +38,5 @@ public interface BaseRoleMemberMapper extends YesBaseMapper<BaseRoleMemberDO> {
         return selectJoinList(IdAndNameDTO.class, query);
     }
 
-    ;;
+    ;
 }

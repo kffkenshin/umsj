@@ -21,7 +21,7 @@ public class ItemVO {
     /**
      * 厂内料号
      */
-    private Long itemNo;
+    private String itemNo;
 
     /**
      * 名称

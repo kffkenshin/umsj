@@ -1,5 +1,6 @@
 package cn.yessoft.umsj.moduler.xinhefa.controller.vo.maindata;
 
+import java.math.BigDecimal;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -34,4 +35,10 @@ public class ProductProcessVO {
     private Integer workStation;
 
     private String workStationStr;
+
+    private BigDecimal prepareRejectRate;
+
+    private BigDecimal processRejectRate;
+
+    private BigDecimal abnormalRejectRate;
 }

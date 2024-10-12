@@ -30,7 +30,7 @@ public class JobHandlerInvoker extends QuartzJobBean {
     private ApplicationContext applicationContext;
 
     @Resource
-    private JobLogFrameworkService jobLogFrameworkService;
+    private JobLogFrameworkService baseJobLogService;
 
     @Override
     protected void executeInternal(JobExecutionContext executionContext) throws JobExecutionException {
@@ -49,7 +49,7 @@ public class JobHandlerInvoker extends QuartzJobBean {
         Throwable exception = null;
         try {
             // 记录 Job 日志（初始）
-            jobLogId = jobLogFrameworkService.createJobLog(jobId, startTime, jobHandlerName, jobHandlerParam, refireCount + 1);
+            jobLogId = baseJobLogService.createJobLog(jobId, startTime, jobHandlerName, jobHandlerParam, refireCount + 1);
             // 执行任务
             data = this.executeInternal(jobHandlerName, jobHandlerParam);
         } catch (Throwable ex) {
@@ -81,7 +81,7 @@ public class JobHandlerInvoker extends QuartzJobBean {
         }
         // 更新日志
         try {
-            jobLogFrameworkService.updateJobLogResultAsync(jobLogId, endTime, (int) LocalDateTimeUtil.between(startTime, endTime).toMillis(), success, data);
+            baseJobLogService.updateJobLogResultAsync(jobLogId, endTime, (int) LocalDateTimeUtil.between(startTime, endTime).toMillis(), success, data);
         } catch (Exception ex) {
             log.error("[executeInternal][Job({}) logId({}) 记录执行日志失败({}/{})]",
                     executionContext.getJobDetail().getKey(), jobLogId, success, data);
