@@ -23,6 +23,7 @@ public interface XhfSaleOrderDetailMapper extends YesBaseMapper<XhfSaleOrderDeta
     query.selectAll(XhfSaleOrderDetailDO.class);
     query.selectAs("header.order_date", XhfSaleOrderDetailDTO::getOrderDate);
     query.selectAs("customer.name_short", XhfSaleOrderDetailDTO::getCusNameShort);
+    query.selectAs("customer.need_sale_no", XhfSaleOrderDetailDTO::getNeedSaleNo);
     query.selectAs("cusitem.customer_item_no", XhfSaleOrderDetailDTO::getCusItemNo);
     query.selectAs("item.item_name", XhfSaleOrderDetailDTO::getItemName);
     query.selectAs("item.item_no", XhfSaleOrderDetailDTO::getItemNo);

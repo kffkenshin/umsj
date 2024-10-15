@@ -49,6 +49,10 @@ public class XhfSaleOrderDetailDTO {
   @JsonFormat(pattern = "MM-dd")
   private LocalDateTime preDeliveryDate;
 
+  /** 预计发货日2 */
+  @JsonFormat(pattern = "yyyy-MM-dd")
+  private LocalDateTime preDeliveryDate2;
+
   /** 销售单位 */
   private String purchasingNuit;
 
@@ -82,4 +86,6 @@ public class XhfSaleOrderDetailDTO {
 
   @JsonSerialize(using = BigDecimalSerialize.class)
   private BigDecimal wpcs;
+
+  private Boolean needSaleNo;
 }

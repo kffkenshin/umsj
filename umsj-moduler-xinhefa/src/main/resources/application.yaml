@@ -32,7 +32,7 @@ yesee:
     # 新建用户/密码初始化的 默认密码
     default-password: "123456"
     # 是否开启定时器  ON是开
-    job-scheduler: "ON"
+    job-scheduler: "OFF"
 --- #################### mybatis-plus ####################
 mybatis-plus-join:
   banner: false
