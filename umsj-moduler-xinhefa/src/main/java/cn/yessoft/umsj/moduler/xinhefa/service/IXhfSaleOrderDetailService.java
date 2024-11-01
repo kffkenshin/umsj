@@ -1,7 +1,7 @@
 package cn.yessoft.umsj.moduler.xinhefa.service;
 
 import cn.yessoft.umsj.common.pojo.PageResult;
-import cn.yessoft.umsj.moduler.xinhefa.controller.vo.saleorder.SaleOrderDetailQueryReqVO;
+import cn.yessoft.umsj.moduler.xinhefa.controller.vo.saleorder.SaleOrderQueryReqVO;
 import cn.yessoft.umsj.moduler.xinhefa.entity.XhfSaleOrderDetailDO;
 import cn.yessoft.umsj.moduler.xinhefa.entity.dto.XhfSaleOrderDetailDTO;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -16,5 +16,5 @@ public interface IXhfSaleOrderDetailService extends IService<XhfSaleOrderDetailD
 
   XhfSaleOrderDetailDO getBySOIDAndSeq(Long id, Integer detailSeq);
 
-  PageResult<XhfSaleOrderDetailDTO> pagedQuery(SaleOrderDetailQueryReqVO reqVO);
+  PageResult<XhfSaleOrderDetailDTO> pagedQuery(SaleOrderQueryReqVO reqVO);
 }

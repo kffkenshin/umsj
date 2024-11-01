@@ -42,6 +42,9 @@ public class XhfItemServiceImpl extends ServiceImpl<XhfItemMapper, XhfItemDO>
     XhfItemDO r = validateExist(reqVO.getId());
     r.setZdDiff(reqVO.getZdDiff());
     r.setRollerLength(reqVO.getRollerLength());
+    r.setFirstMachine(reqVO.getFirstMachine());
+    r.setSecondMachine(reqVO.getSecondMachine());
+    r.setThirdMachine(reqVO.getThirdMachine());
     xhfItemMapper.updateById(r);
   }
 

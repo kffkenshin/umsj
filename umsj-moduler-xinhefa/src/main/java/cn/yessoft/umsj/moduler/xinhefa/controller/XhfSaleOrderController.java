@@ -5,13 +5,17 @@ import static cn.yessoft.umsj.common.pojo.ApiResult.success;
 import cn.yessoft.umsj.common.pojo.ApiResult;
 import cn.yessoft.umsj.common.pojo.EnumSelector;
 import cn.yessoft.umsj.common.pojo.PageResult;
+import cn.yessoft.umsj.common.utils.BeanUtils;
 import cn.yessoft.umsj.moduler.xinhefa.controller.vo.saleorder.SaleOrderDeliverCreateVO;
-import cn.yessoft.umsj.moduler.xinhefa.controller.vo.saleorder.SaleOrderDetailQueryReqVO;
+import cn.yessoft.umsj.moduler.xinhefa.controller.vo.saleorder.SaleOrderQueryReqVO;
+import cn.yessoft.umsj.moduler.xinhefa.controller.vo.saleorder.XhfSoDeliverViewVO;
+import cn.yessoft.umsj.moduler.xinhefa.entity.XhfSoDeliverViewDO;
 import cn.yessoft.umsj.moduler.xinhefa.entity.dto.XhfSaleOrderDetailDTO;
 import cn.yessoft.umsj.moduler.xinhefa.enums.XHFSODeliverStatusEnum;
 import cn.yessoft.umsj.moduler.xinhefa.enums.XHFSODetailAPSStatusEnum;
 import cn.yessoft.umsj.moduler.xinhefa.service.IXhfSaleOrderDeliverService;
 import cn.yessoft.umsj.moduler.xinhefa.service.IXhfSaleOrderDetailService;
+import cn.yessoft.umsj.moduler.xinhefa.service.IXhfSoDeliverViewService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -29,6 +33,7 @@ public class XhfSaleOrderController {
 
   @Resource private IXhfSaleOrderDetailService xhfSaleOrderDetailService;
   @Resource private IXhfSaleOrderDeliverService xhfSaleOrderDeliverService;
+  @Resource private IXhfSoDeliverViewService xhfSoDeliverViewService;
 
   @GetMapping("/detail/apsstatus")
   public ApiResult<List<EnumSelector>> getDetailApsStatusForSelector() {
@@ -41,8 +46,8 @@ public class XhfSaleOrderController {
   }
 
   @PostMapping("/detail/paged-query")
-  public ApiResult<PageResult<XhfSaleOrderDetailDTO>> query(
-      @Valid @RequestBody SaleOrderDetailQueryReqVO reqVO) {
+  public ApiResult<PageResult<XhfSaleOrderDetailDTO>> soDetailQuery(
+      @Valid @RequestBody SaleOrderQueryReqVO reqVO) {
     PageResult<XhfSaleOrderDetailDTO> pageResult = xhfSaleOrderDetailService.pagedQuery(reqVO);
     pageResult
         .getList()
@@ -53,6 +58,16 @@ public class XhfSaleOrderController {
               i.setPreDeliveryDate2(i.getPreDeliveryDate());
             });
     return success(pageResult);
+  }
+
+  @PostMapping("/deliver/paged-query")
+  public ApiResult<PageResult<XhfSoDeliverViewVO>> soDeliverQuery(
+      @Valid @RequestBody SaleOrderQueryReqVO reqVO) {
+    PageResult<XhfSoDeliverViewDO> pageResult = xhfSoDeliverViewService.pagedQuery(reqVO);
+    return success(
+        new PageResult<>(
+            BeanUtils.toBean(pageResult.getList(), XhfSoDeliverViewVO.class),
+            pageResult.getTotal()));
   }
 
   @PostMapping("/deliver/batch-create")

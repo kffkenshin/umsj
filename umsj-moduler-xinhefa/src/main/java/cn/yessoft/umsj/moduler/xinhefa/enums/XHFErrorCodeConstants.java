@@ -10,4 +10,6 @@ import cn.yessoft.umsj.common.exception.ErrorCode;
 public interface XHFErrorCodeConstants {
   // 数据同步 2_001_000_000
   ErrorCode SO_ITEM_NOT_MATCH = new ErrorCode(2_001_000_001, "物料和原订单项次{}不符");
+  // 生产
+  ErrorCode SO_IS_EMPTY = new ErrorCode(2_001_001_001, "没有选择发货批次");
 }

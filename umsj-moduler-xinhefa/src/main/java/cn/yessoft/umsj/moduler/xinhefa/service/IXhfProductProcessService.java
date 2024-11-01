@@ -4,6 +4,7 @@ import cn.yessoft.umsj.common.pojo.PageResult;
 import cn.yessoft.umsj.moduler.base.controller.vo.InfoPageQueryReqVO;
 import cn.yessoft.umsj.moduler.xinhefa.controller.vo.maindata.ProductProcessVO;
 import cn.yessoft.umsj.moduler.xinhefa.controller.vo.maindata.RejectRateSimulateVO;
+import cn.yessoft.umsj.moduler.xinhefa.entity.XhfItemDO;
 import cn.yessoft.umsj.moduler.xinhefa.entity.XhfProductProcessDO;
 import cn.yessoft.umsj.moduler.xinhefa.entity.dto.RejectRateSimulateDTO;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -24,4 +25,6 @@ public interface IXhfProductProcessService extends IService<XhfProductProcessDO>
   RejectRateSimulateDTO simulate(RejectRateSimulateVO reqVO);
 
   RejectRateSimulateDTO simulate(String itemNo, BigDecimal qty);
+
+  RejectRateSimulateDTO simulate(XhfItemDO item, BigDecimal qty);
 }

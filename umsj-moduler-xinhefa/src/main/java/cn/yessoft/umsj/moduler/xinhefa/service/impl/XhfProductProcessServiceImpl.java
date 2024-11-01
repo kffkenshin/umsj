@@ -64,16 +64,29 @@ public class XhfProductProcessServiceImpl
 
   @Override
   public RejectRateSimulateDTO simulate(RejectRateSimulateVO reqVO) {
+    XhfItemDO item = xhfItemService.getItemByNo(reqVO.getItemNo());
+    return simulate(item, reqVO.getQty());
+  }
+
+  @Override
+  public RejectRateSimulateDTO simulate(String itemNo, BigDecimal qty) {
+    RejectRateSimulateVO vo = new RejectRateSimulateVO();
+    vo.setItemNo(itemNo);
+    vo.setQty(qty);
+    return simulate(vo);
+  }
+
+  @Override
+  public RejectRateSimulateDTO simulate(XhfItemDO item, BigDecimal qty) {
     RejectRateSimulateDTO result = new RejectRateSimulateDTO();
     BigDecimal difficulty = BigDecimal.ONE;
-    XhfItemDO item = xhfItemService.getItemByNo(reqVO.getItemNo());
     if (item == null) {
       throw exception(O_NOT_EXISTS, "料号");
     }
     BigDecimal channelsCount =
         new BigDecimal(item.getChannelsCount() == null ? 1 : item.getChannelsCount());
     result.addValue("产内料号", item.getItemNo());
-    result.addValue("订单数量", reqVO.getQty().toPlainString());
+    result.addValue("订单数量", qty.toPlainString());
     result.addValue("产品品名", item.getItemName());
     result.addValue("销售单位", item.getSaleUnit());
     result.addValue("色数", BaseUtils.toString(item.getColorCount()));
@@ -81,11 +94,11 @@ public class XhfProductProcessServiceImpl
     result.addValue("袋长", BaseUtils.toString(item.getLength()));
     result.addValue("通道数", BaseUtils.toString(item.getChannelsCount()));
     result.addValue("克重", BaseUtils.toString(item.getGWeight()));
-    XHFUtils.ProductUnitConvert units = XHFUtils.getProductUnitConvert(item, reqVO.getQty());
+    XHFUtils.ProductUnitConvert units = XHFUtils.getProductUnitConvert(item, qty);
     BigDecimal cpms = units.getM().divide(XHFUtils.K);
     BigDecimal fcpms = units.getM().divide(XHFUtils.K);
     if (fcpms.compareTo(BigDecimal.ZERO) == 0) {
-      throw exception(O_NOT_EXISTS, reqVO.getItemNo() + "成品米数");
+      throw exception(O_NOT_EXISTS, item.getItemNo() + "成品米数");
     }
     result.addValue("成品米数", cpms.toPlainString());
     List<SimulateDetailDTO> routes = xhfProductProcessRouteService.listByitemId(item.getId());
@@ -173,19 +186,17 @@ public class XhfProductProcessServiceImpl
         "投料米数", routes.get(0).getInputQty1().setScale(3, BigDecimal.ROUND_HALF_DOWN) + "");
     BigDecimal diff = routes.get(0).getInputQty1().subtract(fcpms);
     result.addValue(
-        "放量",
+        "放量%",
         diff.divide(fcpms, 6, RoundingMode.HALF_UP)
                 .multiply(XHFUtils.B)
                 .setScale(2, BigDecimal.ROUND_HALF_DOWN)
             + "%");
-    return result;
-  }
+    result.addValue(
+        "放量",
+        diff.divide(fcpms, 6, RoundingMode.HALF_UP)
+            .setScale(2, BigDecimal.ROUND_HALF_DOWN)
+            .toPlainString());
 
-  @Override
-  public RejectRateSimulateDTO simulate(String itemNo, BigDecimal qty) {
-    RejectRateSimulateVO vo = new RejectRateSimulateVO();
-    vo.setItemNo(itemNo);
-    vo.setQty(qty);
-    return simulate(vo);
+    return result;
   }
 }

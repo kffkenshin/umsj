@@ -2,6 +2,7 @@ package cn.yessoft.umsj.moduler.xinhefa.utils;
 
 import cn.yessoft.umsj.moduler.xinhefa.entity.XhfItemDO;
 import cn.yessoft.umsj.moduler.xinhefa.enums.XHFProductUnitEnum;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.math.BigDecimal;
 import lombok.Data;
 
@@ -16,10 +17,15 @@ public class XHFUtils {
   public static final BigDecimal B = new BigDecimal(100);
 
   public static ProductUnitConvert getProductUnitConvert(XhfItemDO item, BigDecimal qty) {
-    ProductUnitConvert result = new ProductUnitConvert();
     BigDecimal length = new BigDecimal(item.getLength() == null ? 1 : item.getLength().intValue());
     BigDecimal gw = item.getGWeight() == null ? new BigDecimal(1) : item.getGWeight();
-    switch (XHFProductUnitEnum.valueof(item.getSaleUnit())) {
+    return getProductUnitConvert(length, gw, item.getSaleUnit(), qty);
+  }
+
+  public static ProductUnitConvert getProductUnitConvert(
+      BigDecimal length, BigDecimal gw, String saleUnit, BigDecimal qty) {
+    ProductUnitConvert result = new ProductUnitConvert();
+    switch (XHFProductUnitEnum.valueof(saleUnit)) {
       case PCS -> {
         result.setPcs(qty);
       }
@@ -45,7 +51,7 @@ public class XHFUtils {
     result.setKg(result.getPcs().multiply(gw).divide(K, 3, BigDecimal.ROUND_HALF_UP));
     result.setM(result.getPcs().multiply(length));
     result.setKm(result.getM().divide(K, 3, BigDecimal.ROUND_HALF_UP));
-    switch (XHFProductUnitEnum.valueof(item.getSaleUnit())) {
+    switch (XHFProductUnitEnum.valueof(saleUnit)) {
       case PCS -> {
         result.setPcs(qty);
       }
@@ -71,11 +77,22 @@ public class XHFUtils {
 
   @Data
   public static class ProductUnitConvert {
+    @JsonSerialize(using = BigDecimalSerialize.class)
     private BigDecimal kg;
+
+    @JsonSerialize(using = BigDecimalSerialize.class)
     private BigDecimal km;
+
+    @JsonSerialize(using = BigDecimalSerialize.class)
     private BigDecimal m;
+
+    @JsonSerialize(using = BigDecimalSerialize.class)
     private BigDecimal pcs;
+
+    @JsonSerialize(using = BigDecimalSerialize.class)
     private BigDecimal kpcs;
+
+    @JsonSerialize(using = BigDecimalSerialize.class)
     private BigDecimal wpcs;
   }
 }

@@ -2,7 +2,7 @@ package cn.yessoft.umsj.moduler.xinhefa.mapper;
 
 import cn.yessoft.umsj.common.pojo.PageResult;
 import cn.yessoft.umsj.common.utils.BaseUtils;
-import cn.yessoft.umsj.moduler.xinhefa.controller.vo.saleorder.SaleOrderDetailQueryReqVO;
+import cn.yessoft.umsj.moduler.xinhefa.controller.vo.saleorder.SaleOrderQueryReqVO;
 import cn.yessoft.umsj.moduler.xinhefa.entity.*;
 import cn.yessoft.umsj.moduler.xinhefa.entity.dto.XhfSaleOrderDetailDTO;
 import cn.yessoft.umsj.mybatis.core.mapper.YesBaseMapper;
@@ -18,7 +18,7 @@ import java.util.List;
  */
 public interface XhfSaleOrderDetailMapper extends YesBaseMapper<XhfSaleOrderDetailDO> {
 
-  default PageResult<XhfSaleOrderDetailDTO> pagedQuery(SaleOrderDetailQueryReqVO reqVO) {
+  default PageResult<XhfSaleOrderDetailDTO> pagedQuery(SaleOrderQueryReqVO reqVO) {
     MPJLambdaWrapperX<XhfSaleOrderDetailDO> query = new MPJLambdaWrapperX<>();
     query.selectAll(XhfSaleOrderDetailDO.class);
     query.selectAs("header.order_date", XhfSaleOrderDetailDTO::getOrderDate);

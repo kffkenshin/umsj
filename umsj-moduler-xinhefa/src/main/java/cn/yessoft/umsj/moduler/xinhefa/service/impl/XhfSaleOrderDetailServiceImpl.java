@@ -1,7 +1,7 @@
 package cn.yessoft.umsj.moduler.xinhefa.service.impl;
 
 import cn.yessoft.umsj.common.pojo.PageResult;
-import cn.yessoft.umsj.moduler.xinhefa.controller.vo.saleorder.SaleOrderDetailQueryReqVO;
+import cn.yessoft.umsj.moduler.xinhefa.controller.vo.saleorder.SaleOrderQueryReqVO;
 import cn.yessoft.umsj.moduler.xinhefa.entity.XhfSaleOrderDetailDO;
 import cn.yessoft.umsj.moduler.xinhefa.entity.dto.XhfSaleOrderDetailDTO;
 import cn.yessoft.umsj.moduler.xinhefa.mapper.XhfSaleOrderDetailMapper;
@@ -29,7 +29,7 @@ public class XhfSaleOrderDetailServiceImpl
   }
 
   @Override
-  public PageResult<XhfSaleOrderDetailDTO> pagedQuery(SaleOrderDetailQueryReqVO reqVO) {
+  public PageResult<XhfSaleOrderDetailDTO> pagedQuery(SaleOrderQueryReqVO reqVO) {
     return xhfSaleOrderDetailMapper.pagedQuery(reqVO);
   }
 }
