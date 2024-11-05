@@ -12,4 +12,5 @@ public interface XHFErrorCodeConstants {
   ErrorCode SO_ITEM_NOT_MATCH = new ErrorCode(2_001_000_001, "物料和原订单项次{}不符");
   // 生产
   ErrorCode SO_IS_EMPTY = new ErrorCode(2_001_001_001, "没有选择发货批次");
+  ErrorCode MO_MACHINE_IS_EMPTY = new ErrorCode(2_001_002_001, "{}选机为空");
 }

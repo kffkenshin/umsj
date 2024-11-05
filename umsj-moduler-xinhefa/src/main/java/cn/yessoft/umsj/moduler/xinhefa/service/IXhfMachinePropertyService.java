@@ -1,8 +1,10 @@
 package cn.yessoft.umsj.moduler.xinhefa.service;
 
 import cn.yessoft.umsj.moduler.xinhefa.entity.XhfMachinePropertyDO;
+import cn.yessoft.umsj.moduler.xinhefa.entity.dto.ProductMachinesDTO;
 import com.baomidou.mybatisplus.extension.service.IService;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 机台产能参数 服务类
@@ -17,4 +19,6 @@ public interface IXhfMachinePropertyService extends IService<XhfMachinePropertyD
   void deleteByMachineId(Long i);
 
   void delete(List<Long> ids);
+
+  Map<Integer, ProductMachinesDTO> getMachins(Long itemId);
 }

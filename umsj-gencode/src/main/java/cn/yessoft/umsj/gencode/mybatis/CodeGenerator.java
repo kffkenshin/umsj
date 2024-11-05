@@ -34,7 +34,7 @@ public class CodeGenerator {
     AutoGenerator generator = new AutoGenerator(DATA_SOURCE_CONFIG);
     generator.strategy(
         strategyConfig()
-            .addInclude("xhf_manufacture_order_log")
+            .addInclude("xhf_machine_disable_plan")
             .controllerBuilder()
             .enableRestStyle()
             .entityBuilder()

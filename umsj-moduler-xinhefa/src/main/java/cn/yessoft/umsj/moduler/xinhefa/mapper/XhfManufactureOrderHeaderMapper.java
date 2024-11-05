@@ -82,5 +82,8 @@ public interface XhfManufactureOrderHeaderMapper
     // todo 快速筛选
     return selectJoinPage(reqVO, MoHeaderDTO.class, query);
   }
-  ;
+
+  default List<XhfManufactureOrderHeaderDO> getHeadersByStatus(String statusNo) {
+    return selectList(XhfManufactureOrderHeaderDO::getStatus, statusNo);
+  }
 }

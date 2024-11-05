@@ -1,6 +1,7 @@
 package cn.yessoft.umsj.moduler.xinhefa.utils;
 
 import cn.yessoft.umsj.moduler.xinhefa.entity.XhfItemDO;
+import cn.yessoft.umsj.moduler.xinhefa.enums.XHFMachineSpeedUnitEnum;
 import cn.yessoft.umsj.moduler.xinhefa.enums.XHFProductUnitEnum;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.math.BigDecimal;
@@ -94,5 +95,40 @@ public class XHFUtils {
 
     @JsonSerialize(using = BigDecimalSerialize.class)
     private BigDecimal wpcs;
+  }
+
+  public static BigDecimal caculateProductTime(
+      BigDecimal printQty,
+      BigDecimal speed,
+      String speedUnit,
+      BigDecimal speedEffective,
+      XhfItemDO item) {
+    switch (XHFMachineSpeedUnitEnum.valueOf(speedUnit.toLowerCase())) {
+      case PCS -> { // 投入米数 *1000 / 袋长 /机速 *效率/60
+        return printQty
+            .multiply(K)
+            .divide(new BigDecimal(item.getLength()))
+            .divide(speed)
+            .multiply(speedEffective)
+            .divide(new BigDecimal(60), 2, BigDecimal.ROUND_HALF_UP);
+      }
+      case LENGTH -> { // 投入米数 / 机速 * 效率 / 60
+        return printQty
+            .divide(speed)
+            .multiply(speedEffective)
+            .divide(new BigDecimal(60), 2, BigDecimal.ROUND_HALF_UP);
+      }
+      case KG -> { // 投入米数 *1000 / 袋长 * 克重/1000 /机速 *效率/60
+        return printQty
+            .divide(new BigDecimal(item.getLength()))
+            .multiply(item.getGWeight())
+            .divide(speed)
+            .multiply(speedEffective)
+            .divide(new BigDecimal(60), 2, BigDecimal.ROUND_HALF_UP);
+      }
+      default -> {
+        return BigDecimal.ZERO;
+      }
+    }
   }
 }

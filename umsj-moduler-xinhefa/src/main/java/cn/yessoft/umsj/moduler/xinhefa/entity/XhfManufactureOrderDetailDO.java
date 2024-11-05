@@ -65,6 +65,9 @@ public class XhfManufactureOrderDetailDO extends BaseDO {
   /** 机速单位 */
   private String speedUnit;
 
+  /** 机速效率 */
+  private BigDecimal speedEfficiency;
+
   /** 序号 */
   private Byte seq;
 
@@ -82,4 +85,6 @@ public class XhfManufactureOrderDetailDO extends BaseDO {
 
   /** 批次ID */
   private Long batchId;
+
+  private Long parentDetailId;
 }

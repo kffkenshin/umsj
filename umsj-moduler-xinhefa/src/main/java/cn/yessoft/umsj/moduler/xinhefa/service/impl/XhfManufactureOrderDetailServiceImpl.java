@@ -27,7 +27,7 @@ public class XhfManufactureOrderDetailServiceImpl
   public XhfManufactureOrderDetailDO createDetail(
       Integer workStation,
       XhfManufactureOrderBatchDO moBatch,
-      long relatedDocId,
+      long parentDetailId,
       BigDecimal leadTime,
       List<SimulateDetailDTO> detail) {
     XhfManufactureOrderDetailDO detailDO = new XhfManufactureOrderDetailDO();
@@ -61,6 +61,7 @@ public class XhfManufactureOrderDetailServiceImpl
     detailDO.setProcessRejectRate(processRejectRate);
     detailDO.setAbnormalRejectRate(actAbnormalRejectRate);
     detailDO.setOutputQty(outputQty);
+    detailDO.setParentDetailId(parentDetailId);
     xhfMoDetailMapper.insert(detailDO);
     return detailDO;
   }
@@ -68,5 +69,11 @@ public class XhfManufactureOrderDetailServiceImpl
   @Override
   public List<XhfManufactureOrderDetailDO> getByHeaderIds(List<Long> headerIds) {
     return xhfMoDetailMapper.getByHeaderIds(headerIds);
+  }
+
+  @Override
+  public String executeScheduler() {
+    StringBuilder resultMsg = new StringBuilder();
+    return resultMsg.toString();
   }
 }

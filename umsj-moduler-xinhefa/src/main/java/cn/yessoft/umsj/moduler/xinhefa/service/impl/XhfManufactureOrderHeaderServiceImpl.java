@@ -1,25 +1,29 @@
 package cn.yessoft.umsj.moduler.xinhefa.service.impl;
 
 import static cn.yessoft.umsj.common.exception.util.ServiceExceptionUtil.exception;
+import static cn.yessoft.umsj.moduler.xinhefa.enums.XHFErrorCodeConstants.MO_MACHINE_IS_EMPTY;
 import static cn.yessoft.umsj.moduler.xinhefa.enums.XHFErrorCodeConstants.SO_IS_EMPTY;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.yessoft.umsj.common.pojo.PageResult;
 import cn.yessoft.umsj.common.utils.BaseUtils;
+import cn.yessoft.umsj.common.utils.BeanUtils;
 import cn.yessoft.umsj.moduler.xinhefa.controller.vo.mo.MoHeaderQueryReqVO;
 import cn.yessoft.umsj.moduler.xinhefa.entity.*;
-import cn.yessoft.umsj.moduler.xinhefa.entity.dto.MoHeaderDTO;
-import cn.yessoft.umsj.moduler.xinhefa.entity.dto.RejectRateSimulateDTO;
+import cn.yessoft.umsj.moduler.xinhefa.entity.dto.*;
 import cn.yessoft.umsj.moduler.xinhefa.enums.*;
 import cn.yessoft.umsj.moduler.xinhefa.mapper.XhfManufactureOrderHeaderMapper;
 import cn.yessoft.umsj.moduler.xinhefa.service.*;
 import cn.yessoft.umsj.moduler.xinhefa.utils.XHFUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import jakarta.annotation.Resource;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -48,6 +52,7 @@ public class XhfManufactureOrderHeaderServiceImpl
   @Resource private IXhfSaleOrderDetailService xhfSaleOrderDetailService;
   @Resource private IXhfProductProcessService xhfProductProcessService;
   @Resource private IXhfItemService xhfItemService;
+  @Resource private IXhfMachinePropertyService xhfMachinePropertyService;
 
   @Override
   @Transactional
@@ -157,6 +162,7 @@ public class XhfManufactureOrderHeaderServiceImpl
     moHeader.setCustomerId(customerId);
     moHeader.setType(moType.getNo());
     moHeader.setSoDetailNumber(soDetail.getSoDetailNumber());
+    moHeader.setStatus(XHFMOHeaderStatusEnum.TOBE_PLANED.getNo());
     this.save(moHeader);
     return moHeader;
   }
@@ -277,5 +283,219 @@ public class XhfManufactureOrderHeaderServiceImpl
             .map(m -> m.getStartTime() == null ? "/" : DateUtil.format(m.getStartTime(), "MM-dd"))
             .findAny()
             .orElse("/"));
+  }
+
+  @Override
+  @Transactional
+  public String initMo() {
+    StringBuilder resultMsg = new StringBuilder();
+    List<XhfManufactureOrderHeaderDO> headers =
+        getHeadersByStatus(XHFMOHeaderStatusEnum.TOBE_PLANED.getNo());
+    List<Long> headerIds = Lists.newArrayList();
+    headers.forEach(i -> headerIds.add(i.getId()));
+    List<XhfManufactureOrderDetailDO> details = xhfMoDetailService.getByHeaderIds(headerIds);
+    List<XhfManufactureOrderBatchDO> batchs = xhfMoBatchService.getByHeaderIds(headerIds);
+    Map<String, BigDecimal> machinePool = Maps.newHashMap(); // 可用机台的池子
+    headers.forEach(
+        i -> {
+          MoDTO moDTO = fillData(i, batchs, details);
+          try {
+            initMachine(moDTO, machinePool);
+            sendT100Mo(moDTO);
+          } catch (Exception ex) {
+            moDTO.getHeader().setStatus(XHFMOHeaderStatusEnum.ERROR1.getNo());
+            moDTO.setMsg(ex.getMessage());
+          }
+          resultMsg.append(moDTO.getMsg());
+          this.update(moDTO);
+        });
+    return resultMsg.toString();
+  }
+
+  private void update(MoDTO moDTO) {
+    this.updateById(moDTO.getHeader());
+    moDTO.getDetails().forEach(i -> xhfMoDetailService.updateById(i));
+    moDTO.getBatchs().forEach(i -> xhfMoBatchService.updateById(i));
+    xhfMoLogService.createMoLog(moDTO.getHeader(), "初始化工单", moDTO.getMsg());
+  }
+
+  private void sendT100Mo(MoDTO mo) {
+    StringBuilder resultMsg = new StringBuilder();
+  }
+
+  // 选机
+  private void initMachine(MoDTO mo, Map<String, BigDecimal> machinePool) {
+    Map<Integer, ProductMachinesDTO> machins =
+        xhfMachinePropertyService.getMachins(mo.getHeader().getItemId());
+    List<XhfManufactureOrderDetailDO> addtion = Lists.newArrayList(); // 存拆出来多台的 多出来的订单detail
+    mo.getDetails()
+        .forEach(
+            i -> {
+              ProductMachinesDTO availbelMachines = machins.get(i.getWorkStation());
+              XhfItemDO item = xhfItemService.getById(mo.getHeader().getItemId());
+              if (availbelMachines == null) {
+                throw exception(
+                    MO_MACHINE_IS_EMPTY, XHFWorkStationEnum.valueOf(i.getWorkStation()).getName());
+              }
+              // 卷数
+              BigDecimal rollCount =
+                  i.getInputQty()
+                      .divide(XHFUtils.K)
+                      .divide(availbelMachines.getRollLength())
+                      .setScale(0, RoundingMode.UP);
+              // 已经选好的机器Map
+              Map<String, BigDecimal> choosedMachine = Maps.newTreeMap();
+              if (availbelMachines.getDefaultNumber() == 1) { // 默认单机的
+                chooseOne(choosedMachine, machinePool, availbelMachines, rollCount, item);
+                fillSpeedParams(
+                    i,
+                    availbelMachines.getMachineParamsDTO(
+                        choosedMachine.keySet().iterator().next()));
+              } else { // 可选是多台机器的情况
+                // 一次拿两卷出来选
+                while (rollCount.compareTo(BigDecimal.ZERO) > 0) {
+                  if (rollCount.compareTo(new BigDecimal(2)) <= 0) {
+                    chooseOne(
+                        choosedMachine, machinePool, availbelMachines, new BigDecimal(2), item);
+                  } else {
+                    chooseOne(choosedMachine, machinePool, availbelMachines, rollCount, item);
+                  }
+                  rollCount = rollCount.subtract(new BigDecimal(2));
+                }
+                // 依据选机结果拆分台数
+                if (choosedMachine.size() == 1) {
+                  fillSpeedParams(
+                      i,
+                      availbelMachines.getMachineParamsDTO(
+                          choosedMachine.keySet().iterator().next()));
+                } else {
+                  BigDecimal leftQty = i.getInputQty().add(BigDecimal.ZERO);
+                  BigDecimal orgOutQty = i.getOutputQty().add(BigDecimal.ZERO);
+                  BigDecimal rate = orgOutQty.divide(leftQty);
+                  Iterator<String> ite =
+                      choosedMachine.keySet().iterator(); // 使用Iterator迭代器 获取HashMap中的键集合 拆台数
+                  while (ite.hasNext()) {
+                    String k = ite.next();
+                    BigDecimal v = choosedMachine.get(k);
+                    MachineParamsDTO para = availbelMachines.getMachineParamsDTO(k);
+                    XhfManufactureOrderDetailDO thisone = i;
+                    if (BaseUtils.isNotEmpty(i.getMachineNumber())) {
+                      thisone = BeanUtils.toBean(i, XhfManufactureOrderDetailDO.class);
+                      addtion.add(thisone);
+                    }
+                    BigDecimal input =
+                        leftQty.compareTo(para.getRollLength().multiply(v)) > 0
+                            ? para.getRollLength().multiply(v)
+                            : leftQty;
+                    thisone.setInputQty(input);
+                    thisone.setOutputQty(i.getInputQty().multiply(rate));
+                    leftQty = leftQty.subtract(input);
+                    fillSpeedParams(thisone, para);
+                  }
+                }
+              }
+            });
+    mo.getDetails().addAll(addtion); // 拆出来的加进去
+  }
+
+  private void chooseOne(
+      Map<String, BigDecimal> choosedMachine,
+      Map<String, BigDecimal> machinePool,
+      ProductMachinesDTO availbelMachines,
+      BigDecimal rollCount,
+      XhfItemDO item) {
+
+    BigDecimal prodtctTime = new BigDecimal(2400); // 目前最少的时间
+    String tempMachine = "";
+    if (choosedMachine.size() < availbelMachines.getDefaultNumber()) { // 还没选满机器 从大池子里面找最空的
+      BigDecimal e;
+      if (availbelMachines.hasFirst()) {
+        prodtctTime =
+            getTime(machinePool, availbelMachines.getFirstMachine().getMachineNo(), false);
+        tempMachine = availbelMachines.getFirstMachine().getMachineNo();
+      }
+      for (MachineParamsDTO mdto : availbelMachines.getSecondMachines()) {
+        e = getTime(machinePool, mdto.getMachineNo(), true);
+        if (e.compareTo(prodtctTime) < 0) {
+          prodtctTime = e;
+          tempMachine = mdto.getMachineNo();
+        }
+      }
+      BigDecimal rollc =
+          choosedMachine.get(tempMachine) == null
+              ? rollCount
+              : choosedMachine.get(tempMachine).add(rollCount);
+    } else { // 已经选满了 从已选的里面找最空的
+      Iterator<String> ite = choosedMachine.keySet().iterator();
+      while (ite.hasNext()) {
+        String k = ite.next();
+        BigDecimal v = choosedMachine.get(k);
+        BigDecimal e = getTime(machinePool, k, false);
+        if (e.compareTo(prodtctTime) < 0) {
+          prodtctTime = e;
+          tempMachine = k;
+        }
+      }
+    }
+    BigDecimal rollc =
+        choosedMachine.get(tempMachine) == null
+            ? rollCount
+            : choosedMachine.get(tempMachine).add(rollCount);
+    choosedMachine.put(tempMachine, rollc);
+    // 计算生产时间
+    machinePool.put(
+        tempMachine,
+        machinePool
+            .get(tempMachine)
+            .add(
+                XHFUtils.caculateProductTime(
+                    rollCount.multiply(availbelMachines.getRollLength()),
+                    availbelMachines.getMachineParamsDTO(tempMachine).getSpeed(),
+                    availbelMachines.getMachineParamsDTO(tempMachine).getSpeedUnit(),
+                    availbelMachines.getMachineParamsDTO(tempMachine).getEfficiency(),
+                    item)));
+  }
+
+  // 从选机池子获取 该机台的已安排时间(小时为单位) 没有的话就去获取后放入
+  // needAdd 说明是次选 需要加一点时间  暂定240 十天
+  private BigDecimal getTime(
+      Map<String, BigDecimal> machinePool, String machineNo, Boolean needAdd) {
+    if (machinePool.get(machineNo) != null) {
+      return !needAdd
+          ? machinePool.get(machineNo)
+          : machinePool.get(machineNo).add(new BigDecimal(240));
+    } else {
+      // 获取当前周 开始的所有工单
+      // 获取当前周 开始的 二个月内的停机计划
+    }
+  }
+
+  private void fillSpeedParams(XhfManufactureOrderDetailDO i, MachineParamsDTO machine) {
+    i.setMachineNumber(machine.getMachineNo());
+    i.setSpeed(machine.getSpeed());
+    i.setSpeedUnit(machine.getSpeedUnit());
+    i.setSpeedEfficiency(machine.getEfficiency());
+  }
+
+  @Override
+  public List<XhfManufactureOrderHeaderDO> getHeadersByStatus(String statusNo) {
+    return moHeaderMapper.getHeadersByStatus(statusNo);
+  }
+
+  private MoDTO fillData(
+      XhfManufactureOrderHeaderDO header,
+      List<XhfManufactureOrderBatchDO> batchs,
+      List<XhfManufactureOrderDetailDO> details) {
+    MoDTO moDTO = new MoDTO();
+    moDTO.setHeader(header);
+    moDTO.setBatchs(
+        batchs.stream()
+            .filter(i -> i.getHeaderId().equals(header.getId()))
+            .collect(Collectors.toList()));
+    moDTO.setDetails(
+        details.stream()
+            .filter(i -> i.getHeaderId().equals(header.getId()))
+            .collect(Collectors.toList()));
+    return moDTO;
   }
 }

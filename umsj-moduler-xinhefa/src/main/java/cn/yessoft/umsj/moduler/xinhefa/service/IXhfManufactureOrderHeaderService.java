@@ -18,4 +18,8 @@ public interface IXhfManufactureOrderHeaderService extends IService<XhfManufactu
   void createFromSoDeliver(List<Long> soIds);
 
   PageResult<MoHeaderDTO> pagedQuery(MoHeaderQueryReqVO reqVO);
+
+  String initMo();
+
+  List<XhfManufactureOrderHeaderDO> getHeadersByStatus(String no);
 }

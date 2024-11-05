@@ -9,7 +9,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * 产品类型表
+ * 产品表
  *
  * @author ethan
  * @since 2024-09-19

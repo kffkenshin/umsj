@@ -16,11 +16,13 @@ import java.util.List;
 public interface IXhfManufactureOrderDetailService extends IService<XhfManufactureOrderDetailDO> {
 
   XhfManufactureOrderDetailDO createDetail(
-      Integer w,
+      Integer workStation,
       XhfManufactureOrderBatchDO moBatch,
-      long l,
+      long parentDetailId,
       BigDecimal bigDecimal,
       List<SimulateDetailDTO> detail);
 
   List<XhfManufactureOrderDetailDO> getByHeaderIds(List<Long> headerIds);
+
+  String executeScheduler();
 }
