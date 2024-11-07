@@ -1,10 +1,14 @@
 package cn.yessoft.umsj.moduler.xinhefa.utils;
 
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.yessoft.umsj.moduler.xinhefa.entity.XhfItemDO;
 import cn.yessoft.umsj.moduler.xinhefa.enums.XHFMachineSpeedUnitEnum;
 import cn.yessoft.umsj.moduler.xinhefa.enums.XHFProductUnitEnum;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.Date;
 import lombok.Data;
 
 public class XHFUtils {
@@ -130,5 +134,15 @@ public class XHFUtils {
         return BigDecimal.ZERO;
       }
     }
+  }
+
+  public static LocalDateTime getWeekBegin() {
+    return LocalDateTimeUtil.of(DateUtil.beginOfWeek(new Date()));
+  }
+
+  public static void main(String[] args) {
+    System.out.println("2024-11-07".substring(0, 4));
+    System.out.println("2024-11-07".substring(5, 7));
+    System.out.println("2024-11-07".substring(8, 10));
   }
 }

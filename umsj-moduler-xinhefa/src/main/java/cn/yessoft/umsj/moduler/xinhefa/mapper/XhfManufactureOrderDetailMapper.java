@@ -3,6 +3,7 @@ package cn.yessoft.umsj.moduler.xinhefa.mapper;
 import cn.yessoft.umsj.moduler.xinhefa.entity.XhfManufactureOrderDetailDO;
 import cn.yessoft.umsj.mybatis.core.mapper.YesBaseMapper;
 import cn.yessoft.umsj.mybatis.core.query.LambdaQueryWrapperX;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -19,6 +20,15 @@ public interface XhfManufactureOrderDetailMapper
         new LambdaQueryWrapperX<XhfManufactureOrderDetailDO>();
     query.in(XhfManufactureOrderDetailDO::getHeaderId, headerIds);
     query.orderByAsc(XhfManufactureOrderDetailDO::getWorkStation);
+    return selectList(query);
+  }
+
+  default List<XhfManufactureOrderDetailDO> getByMachinNoAndStartTime(
+      String machineNo, LocalDateTime beginTime) {
+    LambdaQueryWrapperX<XhfManufactureOrderDetailDO> query =
+        new LambdaQueryWrapperX<XhfManufactureOrderDetailDO>();
+    query.in(XhfManufactureOrderDetailDO::getMachineNumber, machineNo);
+    query.gt(XhfManufactureOrderDetailDO::getStartTime, beginTime);
     return selectList(query);
   }
   ;

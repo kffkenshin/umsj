@@ -8,6 +8,7 @@ import cn.yessoft.umsj.moduler.xinhefa.service.IXhfManufactureOrderDetailService
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import jakarta.annotation.Resource;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
 
@@ -74,6 +75,13 @@ public class XhfManufactureOrderDetailServiceImpl
   @Override
   public String executeScheduler() {
     StringBuilder resultMsg = new StringBuilder();
+
     return resultMsg.toString();
+  }
+
+  @Override
+  public List<XhfManufactureOrderDetailDO> getByMachinNoAndStartTime(
+      String machineNo, LocalDateTime beginTime) {
+    return xhfMoDetailMapper.getByMachinNoAndStartTime(machineNo, beginTime);
   }
 }

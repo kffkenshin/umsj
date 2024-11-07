@@ -5,6 +5,7 @@ import cn.yessoft.umsj.moduler.xinhefa.entity.XhfManufactureOrderDetailDO;
 import cn.yessoft.umsj.moduler.xinhefa.entity.dto.SimulateDetailDTO;
 import com.baomidou.mybatisplus.extension.service.IService;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -25,4 +26,7 @@ public interface IXhfManufactureOrderDetailService extends IService<XhfManufactu
   List<XhfManufactureOrderDetailDO> getByHeaderIds(List<Long> headerIds);
 
   String executeScheduler();
+
+  List<XhfManufactureOrderDetailDO> getByMachinNoAndStartTime(
+      String machineNo, LocalDateTime weekBegin);
 }

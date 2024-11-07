@@ -53,6 +53,7 @@ public class XhfManufactureOrderHeaderServiceImpl
   @Resource private IXhfProductProcessService xhfProductProcessService;
   @Resource private IXhfItemService xhfItemService;
   @Resource private IXhfMachinePropertyService xhfMachinePropertyService;
+  @Resource private IXhfMachineDisablePlanService xhfMachineDisablePlanService;
 
   @Override
   @Transactional
@@ -466,7 +467,35 @@ public class XhfManufactureOrderHeaderServiceImpl
           : machinePool.get(machineNo).add(new BigDecimal(240));
     } else {
       // 获取当前周 开始的所有工单
+      LocalDateTime beginOfThisWeek = XHFUtils.getWeekBegin();
+      List<XhfManufactureOrderDetailDO> details =
+          xhfMoDetailService.getByMachinNoAndStartTime(machineNo, beginOfThisWeek);
+      BigDecimal r = new BigDecimal(0);
+      for (XhfManufactureOrderDetailDO detail : details) {
+        LocalDateTimeUtil.between(detail.getStartTime(), detail.getEndTime()).getSeconds();
+        r =
+            r.add(
+                new BigDecimal(
+                        LocalDateTimeUtil.between(detail.getStartTime(), detail.getEndTime())
+                            .getSeconds())
+                    .divide(new BigDecimal(3600)));
+      }
       // 获取当前周 开始的 二个月内的停机计划
+      List<XhfMachineDisablePlanDO> plans =
+          xhfMachineDisablePlanService.getByMachineNo(
+              machineNo, beginOfThisWeek, beginOfThisWeek.plusDays(60));
+      if (BaseUtils.isNotEmpty(plans)) {
+        for (XhfMachineDisablePlanDO plan : plans) {
+          r =
+              r.add(
+                  new BigDecimal(
+                          LocalDateTimeUtil.between(plan.getStartTime(), plan.getEndTime())
+                              .getSeconds())
+                      .divide(new BigDecimal(3600)));
+        }
+      }
+      machinePool.put(machineNo, r);
+      return r;
     }
   }
 
