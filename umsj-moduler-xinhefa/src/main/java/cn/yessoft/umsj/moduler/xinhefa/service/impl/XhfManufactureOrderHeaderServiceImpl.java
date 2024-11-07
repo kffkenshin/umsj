@@ -54,6 +54,7 @@ public class XhfManufactureOrderHeaderServiceImpl
   @Resource private IXhfItemService xhfItemService;
   @Resource private IXhfMachinePropertyService xhfMachinePropertyService;
   @Resource private IXhfMachineDisablePlanService xhfMachineDisablePlanService;
+  @Resource private IXhfTobeScheduledService xhfTobeScheduledService;
 
   @Override
   @Transactional
@@ -302,6 +303,10 @@ public class XhfManufactureOrderHeaderServiceImpl
           MoDTO moDTO = fillData(i, batchs, details);
           try {
             initMachine(moDTO, machinePool);
+            xhfTobeScheduledService.addScheduler(
+                moDTO.getDetails().get(0).getWorkStation(),
+                moDTO.getDetails().get(0).getMachineNumber(),
+                XHFSchedulerModeEnum.B.getModeNo());
             sendT100Mo(moDTO);
           } catch (Exception ex) {
             moDTO.getHeader().setStatus(XHFMOHeaderStatusEnum.ERROR1.getNo());

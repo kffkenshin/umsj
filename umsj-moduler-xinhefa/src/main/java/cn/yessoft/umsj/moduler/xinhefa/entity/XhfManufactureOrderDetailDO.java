@@ -56,6 +56,12 @@ public class XhfManufactureOrderDetailDO extends BaseDO {
   /** 切换时间 */
   private BigDecimal changeTime;
 
+  /** 生产时间 */
+  private BigDecimal productionTime;
+
+  /** 停机时间 */
+  private BigDecimal stopTime;
+
   /** 完成数量 */
   private BigDecimal finishedQty;
 

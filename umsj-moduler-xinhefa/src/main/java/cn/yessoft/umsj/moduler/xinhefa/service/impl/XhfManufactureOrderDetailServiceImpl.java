@@ -2,9 +2,11 @@ package cn.yessoft.umsj.moduler.xinhefa.service.impl;
 
 import cn.yessoft.umsj.moduler.xinhefa.entity.XhfManufactureOrderBatchDO;
 import cn.yessoft.umsj.moduler.xinhefa.entity.XhfManufactureOrderDetailDO;
+import cn.yessoft.umsj.moduler.xinhefa.entity.XhfTobeScheduledDO;
 import cn.yessoft.umsj.moduler.xinhefa.entity.dto.SimulateDetailDTO;
 import cn.yessoft.umsj.moduler.xinhefa.mapper.XhfManufactureOrderDetailMapper;
 import cn.yessoft.umsj.moduler.xinhefa.service.IXhfManufactureOrderDetailService;
+import cn.yessoft.umsj.moduler.xinhefa.service.IXhfTobeScheduledService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import jakarta.annotation.Resource;
 import java.math.BigDecimal;
@@ -23,6 +25,8 @@ public class XhfManufactureOrderDetailServiceImpl
     extends ServiceImpl<XhfManufactureOrderDetailMapper, XhfManufactureOrderDetailDO>
     implements IXhfManufactureOrderDetailService {
   @Resource private XhfManufactureOrderDetailMapper xhfMoDetailMapper;
+
+  @Resource private IXhfTobeScheduledService xhfTobeScheduledService;
 
   @Override
   public XhfManufactureOrderDetailDO createDetail(
@@ -75,7 +79,8 @@ public class XhfManufactureOrderDetailServiceImpl
   @Override
   public String executeScheduler() {
     StringBuilder resultMsg = new StringBuilder();
-
+    // 一次只调一台机器
+    XhfTobeScheduledDO tobe = xhfTobeScheduledService.getFirst();
     return resultMsg.toString();
   }
 

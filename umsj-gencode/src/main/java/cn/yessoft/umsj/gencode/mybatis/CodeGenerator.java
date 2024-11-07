@@ -34,7 +34,7 @@ public class CodeGenerator {
     AutoGenerator generator = new AutoGenerator(DATA_SOURCE_CONFIG);
     generator.strategy(
         strategyConfig()
-            .addInclude("xhf_machine_disable_plan")
+            .addInclude("xhf_tobe_scheduled")
             .controllerBuilder()
             .enableRestStyle()
             .entityBuilder()
