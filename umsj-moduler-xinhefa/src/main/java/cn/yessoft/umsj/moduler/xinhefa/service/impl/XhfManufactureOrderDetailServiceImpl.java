@@ -3,7 +3,10 @@ package cn.yessoft.umsj.moduler.xinhefa.service.impl;
 import cn.yessoft.umsj.moduler.xinhefa.entity.XhfManufactureOrderBatchDO;
 import cn.yessoft.umsj.moduler.xinhefa.entity.XhfManufactureOrderDetailDO;
 import cn.yessoft.umsj.moduler.xinhefa.entity.XhfTobeScheduledDO;
+import cn.yessoft.umsj.moduler.xinhefa.entity.dto.MoDetailForSchuderDTO;
 import cn.yessoft.umsj.moduler.xinhefa.entity.dto.SimulateDetailDTO;
+import cn.yessoft.umsj.moduler.xinhefa.enums.XHFMODetailStatusEnum;
+import cn.yessoft.umsj.moduler.xinhefa.enums.XHFSchedulerModeEnum;
 import cn.yessoft.umsj.moduler.xinhefa.mapper.XhfManufactureOrderDetailMapper;
 import cn.yessoft.umsj.moduler.xinhefa.service.IXhfManufactureOrderDetailService;
 import cn.yessoft.umsj.moduler.xinhefa.service.IXhfTobeScheduledService;
@@ -11,7 +14,9 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import jakarta.annotation.Resource;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.compress.utils.Lists;
 import org.springframework.stereotype.Service;
 
 /**
@@ -78,10 +83,67 @@ public class XhfManufactureOrderDetailServiceImpl
 
   @Override
   public String executeScheduler() {
-    StringBuilder resultMsg = new StringBuilder();
-    // 一次只调一台机器
+    // 一次只排一台机器
     XhfTobeScheduledDO tobe = xhfTobeScheduledService.getFirst();
+    if (tobe == null) {
+      return "";
+    }
+    StringBuilder resultMsg = new StringBuilder();
+    List<MoDetailForSchuderDTO> datas = prepareData(tobe.getWorkStation(), tobe.getMachineNo());
+    schedule(datas, tobe, resultMsg);
     return resultMsg.toString();
+  }
+
+  // 排程
+  private void schedule(
+      List<MoDetailForSchuderDTO> datas, XhfTobeScheduledDO mode, StringBuilder resultMsg) {
+    switch (XHFSchedulerModeEnum.valueof(mode.getMode())) {
+      case A1 -> {
+        scheduleWithModeA(datas, true, resultMsg);
+      }
+      case A2 -> {
+        scheduleWithModeA(datas, false, resultMsg);
+      }
+      case B -> {}
+      case C -> {}
+    }
+  }
+
+  // 印刷效率优先方式
+  private void scheduleWithModeA(
+      List<MoDetailForSchuderDTO> datas, Boolean needYM, StringBuilder resultMsg) {
+    List<MoDetailForSchuderDTO> solid = Lists.newArrayList(); // 已经定序的
+    List<MoDetailForSchuderDTO> unSolid = new ArrayList<>(datas); // 还没排的
+    // 已完成的和锁排的放进去
+    for (MoDetailForSchuderDTO d : datas) {
+      if (d.getMoDetail().getStatus() <= XHFMODetailStatusEnum.LOCKED.getNo()) {
+        solid.add(d);
+        unSolid.remove(d);
+      }
+    }
+    MoDetailForSchuderDTO lastSolid = null;
+    if (solid.size() > 1) {
+      lastSolid = solid.get(unSolid.size() - 1);
+    }
+    while (unSolid.size() > 0) {
+      MoDetailForSchuderDTO d = getOneModeA(unSolid, lastSolid, needYM);
+      solid.add(d);
+      unSolid.remove(d);
+    }
+  }
+
+  // 获取最相近的
+  private MoDetailForSchuderDTO getOneModeA(
+      List<MoDetailForSchuderDTO> unSolid, MoDetailForSchuderDTO lastSolid, Boolean needYM) {
+    MoDetailForSchuderDTO result = null;
+    // 先找 同品号
+    List<MoDetailForSchuderDTO> sameitem = unSolid.stream().filter();
+  }
+
+  // 准备排产数据
+  private List<MoDetailForSchuderDTO> prepareData(Integer workStation, String machineNo) {
+    List<MoDetailForSchuderDTO> datas = Lists.newArrayList();
+    return datas;
   }
 
   @Override

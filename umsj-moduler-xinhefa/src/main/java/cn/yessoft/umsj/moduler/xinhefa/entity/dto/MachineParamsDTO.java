@@ -15,8 +15,7 @@ import lombok.Setter;
 @Setter
 public class MachineParamsDTO extends BaseDO {
 
-  /** 机台ID */
-  private Long machineId;
+  private Long machineParamId;
 
   private String machineNo;
 

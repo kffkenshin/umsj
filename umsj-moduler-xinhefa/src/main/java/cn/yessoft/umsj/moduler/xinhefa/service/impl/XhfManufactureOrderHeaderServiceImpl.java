@@ -509,6 +509,8 @@ public class XhfManufactureOrderHeaderServiceImpl
     i.setSpeed(machine.getSpeed());
     i.setSpeedUnit(machine.getSpeedUnit());
     i.setSpeedEfficiency(machine.getEfficiency());
+    i.setMachineParamsId(machine.getMachineParamId());
+    i.setStatus(XHFMODetailStatusEnum.TOBE_LOCKED.getNo());
   }
 
   @Override

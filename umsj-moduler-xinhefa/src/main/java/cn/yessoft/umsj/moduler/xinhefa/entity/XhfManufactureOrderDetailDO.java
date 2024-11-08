@@ -39,7 +39,7 @@ public class XhfManufactureOrderDetailDO extends BaseDO {
   private Integer workStation;
 
   /** 状态 */
-  private String status;
+  private Integer status;
 
   /** 开始时间 */
   private LocalDateTime startTime;
@@ -93,4 +93,6 @@ public class XhfManufactureOrderDetailDO extends BaseDO {
   private Long batchId;
 
   private Long parentDetailId;
+
+  private Long machineParamsId;
 }
