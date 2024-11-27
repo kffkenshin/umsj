@@ -1,6 +1,7 @@
 package cn.yessoft.umsj.moduler.xinhefa.service;
 
 import cn.yessoft.umsj.moduler.xinhefa.entity.XhfMachinePropertyDO;
+import cn.yessoft.umsj.moduler.xinhefa.entity.dto.MachineChoiceDTO;
 import cn.yessoft.umsj.moduler.xinhefa.entity.dto.ProductMachinesDTO;
 import com.baomidou.mybatisplus.extension.service.IService;
 import java.util.List;
@@ -20,5 +21,5 @@ public interface IXhfMachinePropertyService extends IService<XhfMachinePropertyD
 
   void delete(List<Long> ids);
 
-  Map<Integer, ProductMachinesDTO> getMachins(Long itemId);
+  Map<String, ProductMachinesDTO> getMachines(MachineChoiceDTO itemId);
 }

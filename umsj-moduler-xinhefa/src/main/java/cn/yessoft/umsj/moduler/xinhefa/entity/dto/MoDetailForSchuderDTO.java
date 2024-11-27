@@ -24,7 +24,13 @@ public class MoDetailForSchuderDTO {
 
   private LocalDateTime requireDate;
 
+  private LocalDateTime startTime;
+
   public LocalDateTime getRequireDate() {
     return moBatch.getRequireDate().plusDays(-moDetail.getLeadTime().longValue());
+  }
+
+  public LocalDateTime getStartTime() {
+    return moDetail.getEarliestStartTime();
   }
 }

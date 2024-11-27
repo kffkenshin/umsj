@@ -31,5 +31,27 @@ public interface XhfManufactureOrderDetailMapper
     query.gt(XhfManufactureOrderDetailDO::getStartTime, beginTime);
     return selectList(query);
   }
+
+  default XhfManufactureOrderDetailDO getLastDetail(XhfManufactureOrderDetailDO moDetail) {
+    LambdaQueryWrapperX<XhfManufactureOrderDetailDO> query =
+        new LambdaQueryWrapperX<XhfManufactureOrderDetailDO>();
+    query.eq(XhfManufactureOrderDetailDO::getWorkStation, moDetail.getWorkStation());
+    query.eq(XhfManufactureOrderDetailDO::getMachineNumber, moDetail.getMachineNumber());
+    query.lt(XhfManufactureOrderDetailDO::getStartTime, moDetail.getStartTime());
+    query.orderByDesc(XhfManufactureOrderDetailDO::getStartTime);
+    return selectOne(query);
+  }
+
+  default List<XhfManufactureOrderDetailDO> getDetailsToPlan(
+      Integer workStation, String machineNo, LocalDateTime start, LocalDateTime end) {
+    LambdaQueryWrapperX<XhfManufactureOrderDetailDO> query =
+        new LambdaQueryWrapperX<XhfManufactureOrderDetailDO>();
+    query.eq(XhfManufactureOrderDetailDO::getMachineNumber, machineNo);
+    query.eq(XhfManufactureOrderDetailDO::getWorkStation, workStation);
+    query.gt(XhfManufactureOrderDetailDO::getStartTime, start);
+    query.lt(XhfManufactureOrderDetailDO::getStartTime, end);
+    query.orderByAsc(XhfManufactureOrderDetailDO::getStartTime);
+    return selectList(query);
+  }
   ;
 }

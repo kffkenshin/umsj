@@ -1,11 +1,17 @@
 package cn.yessoft.umsj.moduler.xinhefa.service.impl;
 
+import static cn.yessoft.umsj.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.yessoft.umsj.common.utils.CacheUtils.buildAsyncReloadingCache;
+import static cn.yessoft.umsj.moduler.xinhefa.enums.XHFErrorCodeConstants.MO_MACHINE_IS_EMPTY;
 
-import cn.yessoft.umsj.moduler.xinhefa.entity.XhfMachinePropertyDO;
-import cn.yessoft.umsj.moduler.xinhefa.entity.dto.ProductMachinesDTO;
+import cn.hutool.core.bean.BeanUtil;
+import cn.yessoft.umsj.common.utils.BaseUtils;
+import cn.yessoft.umsj.moduler.xinhefa.entity.*;
+import cn.yessoft.umsj.moduler.xinhefa.entity.dto.*;
+import cn.yessoft.umsj.moduler.xinhefa.enums.XHFWorkStationEnum;
 import cn.yessoft.umsj.moduler.xinhefa.mapper.XhfMachinePropertyMapper;
-import cn.yessoft.umsj.moduler.xinhefa.service.IXhfMachinePropertyService;
+import cn.yessoft.umsj.moduler.xinhefa.service.*;
+import cn.yessoft.umsj.moduler.xinhefa.utils.MachineRuleUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -15,6 +21,7 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import lombok.Getter;
+import org.apache.commons.compress.utils.Lists;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,16 +35,22 @@ import org.springframework.transaction.annotation.Transactional;
 public class XhfMachinePropertyServiceImpl
     extends ServiceImpl<XhfMachinePropertyMapper, XhfMachinePropertyDO>
     implements IXhfMachinePropertyService {
+
   @Resource private XhfMachinePropertyMapper xhfMachinePropertyMapper;
+  @Resource private IXhfMachineService xhfMachineService;
+  @Resource private IXhfProductProcessRouteService xhfProductProcessRouteService;
+  @Resource private IXhfItemService xhfItemService;
+  @Resource private IXhfProductBomService xhfProductBomService;
+  @Resource private IXhfCustomerService xhfCustomerService;
 
   @Getter
-  private final LoadingCache<Long, Map<Integer, ProductMachinesDTO>> clientCache =
+  private final LoadingCache<MachineChoiceDTO, Map<String, ProductMachinesDTO>> clientCache =
       buildAsyncReloadingCache(
           Duration.ofSeconds(100L),
-          new CacheLoader<Long, Map<Integer, ProductMachinesDTO>>() {
+          new CacheLoader<MachineChoiceDTO, Map<String, ProductMachinesDTO>>() {
             @Override
-            public Map<Integer, ProductMachinesDTO> load(Long id) {
-              return getMachinsByItemId(id);
+            public Map<String, ProductMachinesDTO> load(MachineChoiceDTO ids) {
+              return getMachinesByIds(ids);
             }
           });
 
@@ -59,12 +72,153 @@ public class XhfMachinePropertyServiceImpl
   }
 
   @Override
-  public Map<Integer, ProductMachinesDTO> getMachins(Long itemId) {
+  public Map<String, ProductMachinesDTO> getMachines(MachineChoiceDTO itemId) {
     return clientCache.getUnchecked(itemId);
   }
 
-  private Map<Integer, ProductMachinesDTO> getMachinsByItemId(Long id) {
-    Map<Integer, ProductMachinesDTO> result = Maps.newHashMap();
+  private Map<String, ProductMachinesDTO> getMachinesByIds(MachineChoiceDTO ids) {
+    Map<String, ProductMachinesDTO> result = Maps.newHashMap();
+    List<SimulateDetailDTO> routes = xhfProductProcessRouteService.listByitemId(ids.getItemId());
+    XhfItemDO item = xhfItemService.getById(ids.getItemId());
+    List<XhfProductBomDTO> bom = xhfProductBomService.getByItemId(ids.getItemId());
+    XhfCustomerDO customer = xhfCustomerService.getById(ids.getCustomerId());
+    MachineChosenDTO params = xhfMachineService.getMachineChosen();
+    ProductMachinesDTO zdx = null;
+    for (SimulateDetailDTO i : routes) {
+      switch (XHFWorkStationEnum.valueOf(i.getWorkStation())) {
+        case YS -> { // 选机标准选机
+          ProductMachinesDTO m = pickStatic(item, params);
+          fillMachineParams(m, item, bom, customer, routes, params);
+          result.put(BaseUtils.toString(i.getWorkStation()), m);
+        }
+        case PM, JM, KM, FH, TJ -> { // 区分规则选机
+          ProductMachinesDTO m =
+              pickDynamic(i.getWorkStation(), item, bom, null, routes, customer, params);
+          fillMachineParams(m, item, bom, customer, routes, params);
+          result.put(BaseUtils.toString(i.getWorkStation()), m);
+        }
+        case ZDX -> { // 区分规则选机
+          ProductMachinesDTO m =
+              pickDynamic(i.getWorkStation(), item, bom, null, routes, customer, params);
+          fillMachineParams(m, item, bom, customer, routes, params);
+          zdx = m;
+          result.put(BaseUtils.toString(i.getWorkStation()), m);
+        }
+        case ZDJ -> { // 区分规则选机
+          if (zdx != null) {
+            if (zdx.getFirstMachine() != null) {
+              ProductMachinesDTO m =
+                  pickDynamic(
+                      i.getWorkStation(),
+                      item,
+                      bom,
+                      zdx.getFirstMachine().getMachineNo(),
+                      routes,
+                      customer,
+                      params);
+              fillMachineParams(m, item, bom, customer, routes, params);
+              result.put(
+                  BaseUtils.toString(i.getWorkStation())
+                      .concat("-")
+                      .concat(zdx.getFirstMachine().getMachineNo()),
+                  m);
+            }
+            if (!zdx.getSecondMachines().isEmpty()) {
+              for (MachineParamsDTO ezdx : zdx.getSecondMachines()) {
+                ProductMachinesDTO m =
+                    pickDynamic(
+                        i.getWorkStation(),
+                        item,
+                        bom,
+                        ezdx.getMachineNo(),
+                        routes,
+                        customer,
+                        params);
+                fillMachineParams(m, item, bom, customer, routes, params);
+                result.put(
+                    BaseUtils.toString(i.getWorkStation()).concat("-").concat(ezdx.getMachineNo()),
+                    m);
+              }
+            }
+          } else {
+            ProductMachinesDTO m =
+                pickDynamic(i.getWorkStation(), item, bom, null, routes, customer, params);
+            fillMachineParams(m, item, bom, customer, routes, params);
+            result.put(BaseUtils.toString(i.getWorkStation()), m);
+          }
+        }
+      }
+    }
     return result;
+  }
+
+  private ProductMachinesDTO pickStatic(XhfItemDO item, MachineChosenDTO params) {
+    if (BaseUtils.isEmpty(item.getFirstMachine() == null)) {
+      throw exception(MO_MACHINE_IS_EMPTY, "印刷");
+    }
+    ProductMachinesDTO dto = new ProductMachinesDTO();
+    dto.setDefaultNumber(1);
+    MachineParamsDTO mdto = new MachineParamsDTO();
+    mdto.setMachineNo(item.getFirstMachine());
+    dto.setFirstMachine(mdto);
+    return dto;
+  }
+
+  private void fillMachineParams(
+      ProductMachinesDTO m,
+      XhfItemDO item,
+      List<XhfProductBomDTO> bom,
+      XhfCustomerDO customer,
+      List<SimulateDetailDTO> routes,
+      MachineChosenDTO params) {
+    for (XhfMachinePropertyDO e : params.getMachineProperties()) {
+      if (BaseUtils.isNotEmpty(m.getFirstMachine())
+          && MachineRuleUtil.isFit(
+              m.getFirstMachine().getMachineNo(),
+              item,
+              bom,
+              customer,
+              routes,
+              e,
+              params.getMachines())) {
+        BeanUtil.copyProperties(e, m.getFirstMachine());
+        continue;
+      }
+      if (BaseUtils.isNotEmpty(m.getSecondMachines())) {
+        for (MachineParamsDTO b : m.getSecondMachines()) {
+          if (MachineRuleUtil.isFit(
+              b.getMachineNo(), item, bom, customer, routes, e, params.getMachines())) {
+            BeanUtil.copyProperties(e, b);
+          }
+        }
+      }
+    }
+  }
+
+  private ProductMachinesDTO pickDynamic(
+      Integer workStation,
+      XhfItemDO item,
+      List<XhfProductBomDTO> bom,
+      String xdxNo,
+      List<SimulateDetailDTO> routes,
+      XhfCustomerDO customer,
+      MachineChosenDTO params) {
+    for (XhfDynamicMachineDeterminantDO e : params.getDynamicMachineDeterminants()) {
+      if (MachineRuleUtil.isFit(workStation, e, item, bom, xdxNo, routes, customer)) {
+        ProductMachinesDTO dto = new ProductMachinesDTO();
+        dto.setDefaultNumber(e.getDefaultMachineCount());
+        MachineParamsDTO mdto = new MachineParamsDTO();
+        mdto.setMachineNo(e.getFirstMachineNo());
+        dto.setFirstMachine(mdto);
+        List<MachineParamsDTO> smdto = Lists.newArrayList();
+        if (BaseUtils.isNotEmpty(e.getSencondMachineNo1())) {
+          MachineParamsDTO sdto = new MachineParamsDTO();
+          sdto.setMachineNo(e.getSencondMachineNo1());
+        }
+        dto.setSecondMachines(smdto);
+        return dto;
+      }
+    }
+    throw exception(MO_MACHINE_IS_EMPTY, "印刷");
   }
 }

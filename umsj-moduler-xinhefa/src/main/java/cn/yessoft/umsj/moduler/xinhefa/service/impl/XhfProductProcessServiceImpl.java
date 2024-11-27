@@ -181,22 +181,20 @@ public class XhfProductProcessServiceImpl
       }
     }
     // 表头
-    result.addValue("额外附加难度", difficulty.setScale(2, BigDecimal.ROUND_HALF_DOWN) + "");
-    result.addValue(
-        "投料米数", routes.get(0).getInputQty1().setScale(3, BigDecimal.ROUND_HALF_DOWN) + "");
+    result.addValue("额外附加难度", difficulty.setScale(2, RoundingMode.HALF_DOWN) + "");
+    result.addValue("投料米数", routes.get(0).getInputQty1().setScale(3, RoundingMode.HALF_DOWN) + "");
     BigDecimal diff = routes.get(0).getInputQty1().subtract(fcpms);
     result.addValue(
         "放量%",
         diff.divide(fcpms, 6, RoundingMode.HALF_UP)
                 .multiply(XHFUtils.B)
-                .setScale(2, BigDecimal.ROUND_HALF_DOWN)
+                .setScale(2, RoundingMode.HALF_DOWN)
             + "%");
     result.addValue(
         "放量",
         diff.divide(fcpms, 6, RoundingMode.HALF_UP)
-            .setScale(2, BigDecimal.ROUND_HALF_DOWN)
+            .setScale(2, RoundingMode.HALF_DOWN)
             .toPlainString());
-
     return result;
   }
 }

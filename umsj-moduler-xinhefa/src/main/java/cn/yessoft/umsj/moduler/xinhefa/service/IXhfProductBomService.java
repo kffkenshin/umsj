@@ -19,4 +19,6 @@ public interface IXhfProductBomService extends IService<XhfProductBomDO> {
   void deleteByItemId(Long id);
 
   void insertBatch(List<XhfProductBomDO> results);
+
+  List<XhfProductBomDTO> getByItemId(Long itemId);
 }

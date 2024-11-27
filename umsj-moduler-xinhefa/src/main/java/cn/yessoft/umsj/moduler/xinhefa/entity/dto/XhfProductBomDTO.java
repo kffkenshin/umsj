@@ -1,14 +1,11 @@
 package cn.yessoft.umsj.moduler.xinhefa.entity.dto;
 
+import java.math.BigDecimal;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.math.BigDecimal;
-
 /**
- * <p>
  * BOM表
- * </p>
  *
  * @author ethan
  * @since 2024-09-21
@@ -17,15 +14,23 @@ import java.math.BigDecimal;
 @Setter
 public class XhfProductBomDTO {
 
-    private Integer seq;
+  private Integer seq;
 
-    private String materialNo;
+  private String materialNo;
 
-    private String materialName;
+  private String materialName;
 
-    private BigDecimal baseNumber;
+  private String materialSpec;
 
-    private String processNo;
+  private BigDecimal materialLength;
 
-    private String processName;
+  private BigDecimal materialWidth;
+
+  private BigDecimal materialTickness;
+
+  private BigDecimal baseNumber;
+
+  private String processNo;
+
+  private String processName;
 }

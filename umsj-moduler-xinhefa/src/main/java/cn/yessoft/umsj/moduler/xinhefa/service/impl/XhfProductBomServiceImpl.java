@@ -35,4 +35,9 @@ public class XhfProductBomServiceImpl extends ServiceImpl<XhfProductBomMapper, X
   public void insertBatch(List<XhfProductBomDO> results) {
     xhfProductBomMapper.insertBatch(results);
   }
+
+  @Override
+  public List<XhfProductBomDTO> getByItemId(Long itemId) {
+    return xhfProductBomMapper.getByItemId(itemId);
+  }
 }

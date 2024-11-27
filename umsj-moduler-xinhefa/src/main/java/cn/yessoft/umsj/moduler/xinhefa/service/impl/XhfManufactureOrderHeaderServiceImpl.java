@@ -23,10 +23,7 @@ import jakarta.annotation.Resource;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.apache.commons.compress.utils.Lists;
 import org.springframework.stereotype.Service;
@@ -331,77 +328,84 @@ public class XhfManufactureOrderHeaderServiceImpl
 
   // 选机
   private void initMachine(MoDTO mo, Map<String, BigDecimal> machinePool) {
-    Map<Integer, ProductMachinesDTO> machins =
-        xhfMachinePropertyService.getMachins(mo.getHeader().getItemId());
-    List<XhfManufactureOrderDetailDO> addtion = Lists.newArrayList(); // 存拆出来多台的 多出来的订单detail
-    mo.getDetails()
-        .forEach(
-            i -> {
-              ProductMachinesDTO availbelMachines = machins.get(i.getWorkStation());
-              XhfItemDO item = xhfItemService.getById(mo.getHeader().getItemId());
-              if (availbelMachines == null) {
-                throw exception(
-                    MO_MACHINE_IS_EMPTY, XHFWorkStationEnum.valueOf(i.getWorkStation()).getName());
-              }
-              // 卷数
-              BigDecimal rollCount =
-                  i.getInputQty()
-                      .divide(XHFUtils.K)
-                      .divide(availbelMachines.getRollLength())
-                      .setScale(0, RoundingMode.UP);
-              // 已经选好的机器Map
-              Map<String, BigDecimal> choosedMachine = Maps.newTreeMap();
-              if (availbelMachines.getDefaultNumber() == 1) { // 默认单机的
-                chooseOne(choosedMachine, machinePool, availbelMachines, rollCount, item);
-                fillSpeedParams(
-                    i,
-                    availbelMachines.getMachineParamsDTO(
-                        choosedMachine.keySet().iterator().next()));
-              } else { // 可选是多台机器的情况
-                // 一次拿两卷出来选
-                while (rollCount.compareTo(BigDecimal.ZERO) > 0) {
-                  if (rollCount.compareTo(new BigDecimal(2)) <= 0) {
-                    chooseOne(
-                        choosedMachine, machinePool, availbelMachines, new BigDecimal(2), item);
-                  } else {
-                    chooseOne(choosedMachine, machinePool, availbelMachines, rollCount, item);
-                  }
-                  rollCount = rollCount.subtract(new BigDecimal(2));
-                }
-                // 依据选机结果拆分台数
-                if (choosedMachine.size() == 1) {
-                  fillSpeedParams(
-                      i,
-                      availbelMachines.getMachineParamsDTO(
-                          choosedMachine.keySet().iterator().next()));
-                } else {
-                  BigDecimal leftQty = i.getInputQty().add(BigDecimal.ZERO);
-                  BigDecimal orgOutQty = i.getOutputQty().add(BigDecimal.ZERO);
-                  BigDecimal rate = orgOutQty.divide(leftQty);
-                  Iterator<String> ite =
-                      choosedMachine.keySet().iterator(); // 使用Iterator迭代器 获取HashMap中的键集合 拆台数
-                  while (ite.hasNext()) {
-                    String k = ite.next();
-                    BigDecimal v = choosedMachine.get(k);
-                    MachineParamsDTO para = availbelMachines.getMachineParamsDTO(k);
-                    XhfManufactureOrderDetailDO thisone = i;
-                    if (BaseUtils.isNotEmpty(i.getMachineNumber())) {
-                      thisone = BeanUtils.toBean(i, XhfManufactureOrderDetailDO.class);
-                      addtion.add(thisone);
-                    }
-                    BigDecimal input =
-                        leftQty.compareTo(para.getRollLength().multiply(v)) > 0
-                            ? para.getRollLength().multiply(v)
-                            : leftQty;
-                    thisone.setInputQty(input);
-                    thisone.setOutputQty(i.getInputQty().multiply(rate));
-                    leftQty = leftQty.subtract(input);
-                    fillSpeedParams(thisone, para);
-                  }
-                }
-              }
-            });
-    mo.getDetails().addAll(addtion); // 拆出来的加进去
+    MachineChoiceDTO machine = new MachineChoiceDTO();
+    machine.setCustomerId(mo.getHeader().getCustomerId());
+    machine.setItemId(mo.getHeader().getItemId());
+    Map<String, ProductMachinesDTO> machinesFit = xhfMachinePropertyService.getMachines(machine);
+    List<XhfManufactureOrderDetailDO> addition = Lists.newArrayList(); // 存拆出来多台的 多出来的订单detail
+    String zdxMachinNo = "";
+    for (XhfManufactureOrderDetailDO i : mo.getDetails()) {
+      String key = BaseUtils.toString(i.getWorkStation());
+      if (XHFWorkStationEnum.ZDJ.getCode() == i.getWorkStation()) {
+        key = key + "-" + zdxMachinNo;
+      }
+      ProductMachinesDTO availableMachines = machinesFit.get(key);
+      XhfItemDO item = xhfItemService.getById(mo.getHeader().getItemId());
+      if (availableMachines == null) {
+        throw exception(
+            MO_MACHINE_IS_EMPTY, XHFWorkStationEnum.valueOf(i.getWorkStation()).getName());
+      }
+      // 卷数
+      BigDecimal rollCount =
+          i.getInputQty()
+              .divide(XHFUtils.K)
+              .divide(availableMachines.getRollLength())
+              .setScale(0, RoundingMode.UP);
+      // 已经选好的机器Map
+      Map<String, BigDecimal> choosedMachine = Maps.newTreeMap();
+      if (availableMachines.getDefaultNumber() == 1) { // 默认单机的
+        chooseOne(choosedMachine, machinePool, availableMachines, rollCount, item);
+        fillSpeedParams(
+            i, availableMachines.getMachineParamsDTO(choosedMachine.keySet().iterator().next()));
+      } else { // 可选是多台机器的情况
+        // 一次拿两卷出来选
+        while (rollCount.compareTo(BigDecimal.ZERO) > 0) {
+          if (rollCount.compareTo(new BigDecimal(2)) <= 0) {
+            chooseOne(choosedMachine, machinePool, availableMachines, new BigDecimal(2), item);
+          } else {
+            chooseOne(choosedMachine, machinePool, availableMachines, rollCount, item);
+          }
+          rollCount = rollCount.subtract(new BigDecimal(2));
+        }
+        // 依据选机结果拆分台数
+        if (choosedMachine.size() == 1) {
+          fillSpeedParams(
+              i, availableMachines.getMachineParamsDTO(choosedMachine.keySet().iterator().next()));
+          // 记录选的制袋线的机台
+          if (Objects.equals(XHFWorkStationEnum.ZDX.getCode(), i.getWorkStation())) {
+            zdxMachinNo =
+                availableMachines
+                    .getMachineParamsDTO(choosedMachine.keySet().iterator().next())
+                    .getMachineNo();
+          }
+        } else {
+          BigDecimal leftQty = i.getInputQty().add(BigDecimal.ZERO);
+          BigDecimal orgOutQty = i.getOutputQty().add(BigDecimal.ZERO);
+          BigDecimal rate = orgOutQty.divide(leftQty);
+          Iterator<String> ite =
+              choosedMachine.keySet().iterator(); // 使用Iterator迭代器 获取HashMap中的键集合 拆台数
+          while (ite.hasNext()) {
+            String k = ite.next();
+            BigDecimal v = choosedMachine.get(k);
+            MachineParamsDTO para = availableMachines.getMachineParamsDTO(k);
+            XhfManufactureOrderDetailDO thisone = i;
+            if (BaseUtils.isNotEmpty(i.getMachineNumber())) {
+              thisone = BeanUtils.toBean(i, XhfManufactureOrderDetailDO.class);
+              addition.add(thisone);
+            }
+            BigDecimal input =
+                leftQty.compareTo(para.getRollLength().multiply(v)) > 0
+                    ? para.getRollLength().multiply(v)
+                    : leftQty;
+            thisone.setInputQty(input);
+            thisone.setOutputQty(i.getInputQty().multiply(rate));
+            leftQty = leftQty.subtract(input);
+            fillSpeedParams(thisone, para);
+          }
+        }
+      }
+    }
+    mo.getDetails().addAll(addition); // 拆出来的加进去
   }
 
   private void chooseOne(
