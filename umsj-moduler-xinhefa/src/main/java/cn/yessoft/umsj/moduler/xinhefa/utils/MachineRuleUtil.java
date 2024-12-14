@@ -6,6 +6,7 @@ import cn.yessoft.umsj.moduler.xinhefa.entity.dto.SimulateDetailDTO;
 import cn.yessoft.umsj.moduler.xinhefa.entity.dto.XhfProductBomDTO;
 import cn.yessoft.umsj.moduler.xinhefa.enums.XHFManufactureRuleEnum;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -87,7 +88,7 @@ public class MachineRuleUtil {
       List<XhfProductBomDTO> bom,
       List<SimulateDetailDTO> routes,
       XhfCustomerDO customer) {
-    if (BaseUtils.isNotEmpty(optionCode)) {
+    if (BaseUtils.isEmpty(optionCode)) {
       return true;
     }
     switch (XHFManufactureRuleEnum.valueOfOptionCode(optionCode)) {
@@ -366,8 +367,8 @@ public class MachineRuleUtil {
 
   private static boolean evaluateCondition(String content, BigDecimal value) {
     // 使用正则表达式匹配不同的条件格式
-    String singleOpRegex = "/^([<>=]=?)\\s*(\\d+(\\.\\d+)?)$/";
-    String rangeRegex = "/^(\\d+(\\.\\d+)?)\\s*-\\s*(\\d+(\\.\\d+)?)$/";
+    String singleOpRegex = "^([<>=]=?)\\s*(\\d+(\\.\\d+)?)$";
+    String rangeRegex = "^(\\d+(\\.\\d+)?)\\s*-\\s*(\\d+(\\.\\d+)?)$";
     Pattern pattern1 = Pattern.compile(singleOpRegex);
     Matcher matcher1 = pattern1.matcher(content);
     if (matcher1.find()) {
@@ -413,12 +414,7 @@ public class MachineRuleUtil {
   }
 
   public static void main(String[] args) {
-    String regex = "[（(](\\d+(\\.\\d+)?)[＋+](\\d+(\\.\\d+)?)";
-    String str = "45*170*384（152+153+40*2）";
-    Pattern pattern = Pattern.compile(regex);
-    Matcher matcher = pattern.matcher(str);
-    matcher.find();
-    System.out.println(matcher.group(1));
-    System.out.println(matcher.group(3));
+    BigDecimal i = new BigDecimal(13).divide(new BigDecimal(2), RoundingMode.CEILING);
+    System.out.println(i.intValue());
   }
 }

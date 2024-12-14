@@ -11,6 +11,7 @@ import cn.yessoft.umsj.moduler.xinhefa.enums.XHFProductUnitEnum;
 import cn.yessoft.umsj.moduler.xinhefa.enums.XHFWorkStationEnum;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
@@ -119,13 +120,14 @@ public class XHFUtils {
         change =
             huanxing.add(
                 qty.multiply(machineProperty.getChangeRollTime())
-                    .divide(new BigDecimal(item.getChannelsCount() / 2)));
+                    .divide(
+                        new BigDecimal(item.getChannelsCount() / 2), 3, RoundingMode.HALF_DOWN));
       }
       case ZDX -> { // 切换时间=（换型切换时间+换卷切换时间X投入卷数*通道数）/60
         change =
             huanxing.add(
                 qty.multiply(machineProperty.getChangeRollTime())
-                    .divide(new BigDecimal(item.getChannelsCount())));
+                    .divide(new BigDecimal(item.getChannelsCount()), 3, RoundingMode.HALF_DOWN));
       }
       default -> {}
     }
@@ -144,12 +146,12 @@ public class XHFUtils {
     for (XhfMachineDisablePlanDO plan : machineDisablePlans) {
       if (plan.getStartTime().isAfter(moDetail.getStartTime())
           && plan.getStartTime().isBefore(stoped)) {
-        BigDecimal stoptime =
+        BigDecimal stopTime =
             new BigDecimal(
                 LocalDateTimeUtil.between(plan.getStartTime(), plan.getEndTime()).getSeconds()
                     / 60);
-        result = result.add(stoptime);
-        stoped = stoped.plusMinutes(stoptime.longValue());
+        result = result.add(stopTime);
+        stoped = stoped.plusMinutes(stopTime.longValue());
       }
     }
     return result;
@@ -183,22 +185,22 @@ public class XHFUtils {
       String speedUnit,
       BigDecimal speedEffective,
       XhfItemDO item) {
-    switch (XHFMachineSpeedUnitEnum.valueOf(speedUnit.toLowerCase())) {
+    switch (XHFMachineSpeedUnitEnum.valueof(speedUnit.toLowerCase())) {
       case PCS -> { // 投入米数 *1000 / 袋长 /机速 *效率/60
         return printQty
             .multiply(K)
-            .divide(new BigDecimal(item.getLength()))
-            .divide(speed)
+            .divide(new BigDecimal(item.getLength()), 3, RoundingMode.HALF_DOWN)
+            .divide(speed, 3, RoundingMode.HALF_DOWN)
             .multiply(speedEffective);
       }
       case LENGTH -> { // 投入米数 / 机速 * 效率 / 60
-        return printQty.divide(speed).multiply(speedEffective);
+        return printQty.divide(speed, 3, RoundingMode.HALF_DOWN).multiply(speedEffective);
       }
       case KG -> { // 投入米数 *1000 / 袋长 * 克重/1000 /机速 *效率/60
         return printQty
-            .divide(new BigDecimal(item.getLength()))
+            .divide(new BigDecimal(item.getLength()), 3, RoundingMode.HALF_DOWN)
             .multiply(item.getGWeight())
-            .divide(speed)
+            .divide(speed, 3, RoundingMode.HALF_DOWN)
             .multiply(speedEffective);
       }
       default -> {

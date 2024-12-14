@@ -28,8 +28,8 @@ public interface XhfProductBomMapper extends YesBaseMapper<XhfProductBomDO> {
     query.selectAs("item.item_no", XhfProductBomDTO::getMaterialNo);
     query.selectAs("item.item_name", XhfProductBomDTO::getMaterialName);
     query.selectAs("item.item_spec", XhfProductBomDTO::getMaterialSpec);
-    query.selectAs("item.tickness", XhfProductBomDTO::getMaterialSpec);
-    query.selectAs("item.width", XhfProductBomDTO::getMaterialSpec);
+    query.selectAs("item.tickness", XhfProductBomDTO::getMaterialTickness);
+    query.selectAs("item.width", XhfProductBomDTO::getMaterialWidth);
     query.selectAs("item.length", XhfProductBomDTO::getMaterialLength);
     query.selectAs("t.base_number", XhfProductBomDTO::getBaseNumber);
     query.selectAs("process.process_no", XhfProductBomDTO::getProcessNo);

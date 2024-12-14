@@ -3,6 +3,7 @@ package cn.yessoft.umsj.moduler.xinhefa.service.impl;
 import static cn.yessoft.umsj.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.yessoft.umsj.common.utils.CacheUtils.buildAsyncReloadingCache;
 import static cn.yessoft.umsj.moduler.xinhefa.enums.XHFErrorCodeConstants.MO_MACHINE_IS_EMPTY;
+import static cn.yessoft.umsj.moduler.xinhefa.enums.XHFErrorCodeConstants.NO_MACHINE_SPEED;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.yessoft.umsj.common.utils.BaseUtils;
@@ -16,10 +17,12 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import jakarta.annotation.Resource;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import lombok.Getter;
 import org.apache.commons.compress.utils.Lists;
 import org.springframework.stereotype.Service;
@@ -79,72 +82,56 @@ public class XhfMachinePropertyServiceImpl
   private Map<String, ProductMachinesDTO> getMachinesByIds(MachineChoiceDTO ids) {
     Map<String, ProductMachinesDTO> result = Maps.newHashMap();
     List<SimulateDetailDTO> routes = xhfProductProcessRouteService.listByitemId(ids.getItemId());
+    Set<Integer> ws = Sets.newLinkedHashSet();
+    for (SimulateDetailDTO i : routes) {
+      ws.add(i.getWorkStation());
+    }
     XhfItemDO item = xhfItemService.getById(ids.getItemId());
     List<XhfProductBomDTO> bom = xhfProductBomService.getByItemId(ids.getItemId());
     XhfCustomerDO customer = xhfCustomerService.getById(ids.getCustomerId());
     MachineChosenDTO params = xhfMachineService.getMachineChosen();
     ProductMachinesDTO zdx = null;
-    for (SimulateDetailDTO i : routes) {
-      switch (XHFWorkStationEnum.valueOf(i.getWorkStation())) {
+    for (Integer i : ws) {
+      switch (XHFWorkStationEnum.valueOf(i)) {
         case YS -> { // 选机标准选机
           ProductMachinesDTO m = pickStatic(item, params);
           fillMachineParams(m, item, bom, customer, routes, params);
-          result.put(BaseUtils.toString(i.getWorkStation()), m);
+          result.put(BaseUtils.toString(i), m);
         }
         case PM, JM, KM, FH, TJ -> { // 区分规则选机
-          ProductMachinesDTO m =
-              pickDynamic(i.getWorkStation(), item, bom, null, routes, customer, params);
+          ProductMachinesDTO m = pickDynamic(i, item, bom, null, routes, customer, params);
           fillMachineParams(m, item, bom, customer, routes, params);
-          result.put(BaseUtils.toString(i.getWorkStation()), m);
+          result.put(BaseUtils.toString(i), m);
         }
         case ZDX -> { // 区分规则选机
-          ProductMachinesDTO m =
-              pickDynamic(i.getWorkStation(), item, bom, null, routes, customer, params);
+          ProductMachinesDTO m = pickDynamic(i, item, bom, null, routes, customer, params);
           fillMachineParams(m, item, bom, customer, routes, params);
           zdx = m;
-          result.put(BaseUtils.toString(i.getWorkStation()), m);
+          result.put(BaseUtils.toString(i), m);
         }
         case ZDJ -> { // 区分规则选机
           if (zdx != null) {
             if (zdx.getFirstMachine() != null) {
               ProductMachinesDTO m =
                   pickDynamic(
-                      i.getWorkStation(),
-                      item,
-                      bom,
-                      zdx.getFirstMachine().getMachineNo(),
-                      routes,
-                      customer,
-                      params);
+                      i, item, bom, zdx.getFirstMachine().getMachineNo(), routes, customer, params);
               fillMachineParams(m, item, bom, customer, routes, params);
               result.put(
-                  BaseUtils.toString(i.getWorkStation())
-                      .concat("-")
-                      .concat(zdx.getFirstMachine().getMachineNo()),
+                  BaseUtils.toString(i).concat("-").concat(zdx.getFirstMachine().getMachineNo()),
                   m);
             }
             if (!zdx.getSecondMachines().isEmpty()) {
               for (MachineParamsDTO ezdx : zdx.getSecondMachines()) {
                 ProductMachinesDTO m =
-                    pickDynamic(
-                        i.getWorkStation(),
-                        item,
-                        bom,
-                        ezdx.getMachineNo(),
-                        routes,
-                        customer,
-                        params);
+                    pickDynamic(i, item, bom, ezdx.getMachineNo(), routes, customer, params);
                 fillMachineParams(m, item, bom, customer, routes, params);
-                result.put(
-                    BaseUtils.toString(i.getWorkStation()).concat("-").concat(ezdx.getMachineNo()),
-                    m);
+                result.put(BaseUtils.toString(i).concat("-").concat(ezdx.getMachineNo()), m);
               }
             }
           } else {
-            ProductMachinesDTO m =
-                pickDynamic(i.getWorkStation(), item, bom, null, routes, customer, params);
+            ProductMachinesDTO m = pickDynamic(i, item, bom, null, routes, customer, params);
             fillMachineParams(m, item, bom, customer, routes, params);
-            result.put(BaseUtils.toString(i.getWorkStation()), m);
+            result.put(BaseUtils.toString(i), m);
           }
         }
       }
@@ -153,7 +140,7 @@ public class XhfMachinePropertyServiceImpl
   }
 
   private ProductMachinesDTO pickStatic(XhfItemDO item, MachineChosenDTO params) {
-    if (BaseUtils.isEmpty(item.getFirstMachine() == null)) {
+    if (BaseUtils.isEmpty(item.getFirstMachine())) {
       throw exception(MO_MACHINE_IS_EMPTY, "印刷");
     }
     ProductMachinesDTO dto = new ProductMachinesDTO();
@@ -161,6 +148,7 @@ public class XhfMachinePropertyServiceImpl
     MachineParamsDTO mdto = new MachineParamsDTO();
     mdto.setMachineNo(item.getFirstMachine());
     dto.setFirstMachine(mdto);
+    dto.setSecondMachines(Lists.newArrayList());
     return dto;
   }
 
@@ -171,6 +159,7 @@ public class XhfMachinePropertyServiceImpl
       XhfCustomerDO customer,
       List<SimulateDetailDTO> routes,
       MachineChosenDTO params) {
+    boolean found = false;
     for (XhfMachinePropertyDO e : params.getMachineProperties()) {
       if (BaseUtils.isNotEmpty(m.getFirstMachine())
           && MachineRuleUtil.isFit(
@@ -181,17 +170,24 @@ public class XhfMachinePropertyServiceImpl
               routes,
               e,
               params.getMachines())) {
+        m.setRollLength(e.getRollLength());
         BeanUtil.copyProperties(e, m.getFirstMachine());
-        continue;
+        found = true;
+        break;
       }
       if (BaseUtils.isNotEmpty(m.getSecondMachines())) {
         for (MachineParamsDTO b : m.getSecondMachines()) {
           if (MachineRuleUtil.isFit(
               b.getMachineNo(), item, bom, customer, routes, e, params.getMachines())) {
+            m.setRollLength(e.getRollLength());
             BeanUtil.copyProperties(e, b);
+            found = true;
           }
         }
       }
+    }
+    if (!found) {
+      throw exception(NO_MACHINE_SPEED);
     }
   }
 
@@ -219,6 +215,6 @@ public class XhfMachinePropertyServiceImpl
         return dto;
       }
     }
-    throw exception(MO_MACHINE_IS_EMPTY, "印刷");
+    throw exception(MO_MACHINE_IS_EMPTY, XHFWorkStationEnum.valueOf(workStation).getName());
   }
 }

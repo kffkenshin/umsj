@@ -1,5 +1,6 @@
 package cn.yessoft.umsj.moduler.xinhefa.enums;
 
+import cn.hutool.core.util.ArrayUtil;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -13,4 +14,8 @@ public enum XHFMachineSpeedUnitEnum {
   ;
 
   private final String name;
+
+  public static XHFMachineSpeedUnitEnum valueof(String value) {
+    return ArrayUtil.firstMatch(e -> e.getName().equals(value), XHFMachineSpeedUnitEnum.values());
+  }
 }

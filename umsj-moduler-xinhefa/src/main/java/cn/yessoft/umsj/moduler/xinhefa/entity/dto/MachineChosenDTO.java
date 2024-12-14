@@ -16,7 +16,5 @@ public class MachineChosenDTO {
 
   private List<XhfMachinePropertyDO> machineProperties;
 
-  private List<XhfProductProcessDO> productProcesses;
-
   private List<XhfDynamicMachineDeterminantDO> dynamicMachineDeterminants;
 }

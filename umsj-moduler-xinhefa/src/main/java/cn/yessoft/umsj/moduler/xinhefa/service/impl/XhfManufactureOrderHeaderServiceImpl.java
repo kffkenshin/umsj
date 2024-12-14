@@ -6,6 +6,7 @@ import static cn.yessoft.umsj.moduler.xinhefa.enums.XHFErrorCodeConstants.SO_IS_
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.LocalDateTimeUtil;
+import cn.yessoft.umsj.common.exception.ServiceException;
 import cn.yessoft.umsj.common.pojo.PageResult;
 import cn.yessoft.umsj.common.utils.BaseUtils;
 import cn.yessoft.umsj.common.utils.BeanUtils;
@@ -19,6 +20,7 @@ import cn.yessoft.umsj.moduler.xinhefa.utils.XHFUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 import jakarta.annotation.Resource;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -110,7 +112,7 @@ public class XhfManufactureOrderHeaderServiceImpl
     RejectRateSimulateDTO fl;
     try {
       fl = xhfProductProcessService.simulate(item, qty);
-    } catch (Exception e) {
+    } catch (ServiceException e) {
       moHeader.setRemark(e.getMessage());
       moHeader.setStatus(XHFMOHeaderStatusEnum.ERROR1.getNo());
       moHeaderMapper.updateById(moHeader);
@@ -290,6 +292,9 @@ public class XhfManufactureOrderHeaderServiceImpl
     StringBuilder resultMsg = new StringBuilder();
     List<XhfManufactureOrderHeaderDO> headers =
         getHeadersByStatus(XHFMOHeaderStatusEnum.TOBE_PLANED.getNo());
+    if (headers.isEmpty()) {
+      return resultMsg.toString();
+    }
     List<Long> headerIds = Lists.newArrayList();
     headers.forEach(i -> headerIds.add(i.getId()));
     List<XhfManufactureOrderDetailDO> details = xhfMoDetailService.getByHeaderIds(headerIds);
@@ -305,8 +310,15 @@ public class XhfManufactureOrderHeaderServiceImpl
                 moDTO.getDetails().get(0).getMachineNumber(),
                 XHFSchedulerModeEnum.B.getModeNo());
             sendT100Mo(moDTO);
-          } catch (Exception ex) {
+          } catch (UncheckedExecutionException ex) {
+            ex.printStackTrace();
             moDTO.getHeader().setStatus(XHFMOHeaderStatusEnum.ERROR1.getNo());
+            moDTO.getHeader().setRemark(ex.getCause().getMessage());
+            moDTO.setMsg(ex.getMessage());
+          } catch (Exception ex) {
+            ex.printStackTrace();
+            moDTO.getHeader().setStatus(XHFMOHeaderStatusEnum.ERROR1.getNo());
+            moDTO.getHeader().setRemark(ex.getMessage());
             moDTO.setMsg(ex.getMessage());
           }
           resultMsg.append(moDTO.getMsg());
@@ -331,16 +343,17 @@ public class XhfManufactureOrderHeaderServiceImpl
     MachineChoiceDTO machine = new MachineChoiceDTO();
     machine.setCustomerId(mo.getHeader().getCustomerId());
     machine.setItemId(mo.getHeader().getItemId());
+    // 选机
     Map<String, ProductMachinesDTO> machinesFit = xhfMachinePropertyService.getMachines(machine);
     List<XhfManufactureOrderDetailDO> addition = Lists.newArrayList(); // 存拆出来多台的 多出来的订单detail
     String zdxMachinNo = "";
+    XhfItemDO item = xhfItemService.getById(mo.getHeader().getItemId());
     for (XhfManufactureOrderDetailDO i : mo.getDetails()) {
       String key = BaseUtils.toString(i.getWorkStation());
       if (XHFWorkStationEnum.ZDJ.getCode() == i.getWorkStation()) {
         key = key + "-" + zdxMachinNo;
       }
       ProductMachinesDTO availableMachines = machinesFit.get(key);
-      XhfItemDO item = xhfItemService.getById(mo.getHeader().getItemId());
       if (availableMachines == null) {
         throw exception(
             MO_MACHINE_IS_EMPTY, XHFWorkStationEnum.valueOf(i.getWorkStation()).getName());
@@ -349,8 +362,7 @@ public class XhfManufactureOrderHeaderServiceImpl
       BigDecimal rollCount =
           i.getInputQty()
               .divide(XHFUtils.K)
-              .divide(availableMachines.getRollLength())
-              .setScale(0, RoundingMode.UP);
+              .divide(availableMachines.getRollLength(), 0, RoundingMode.UP);
       // 已经选好的机器Map
       Map<String, BigDecimal> choosedMachine = Maps.newTreeMap();
       if (availableMachines.getDefaultNumber() == 1) { // 默认单机的
@@ -481,13 +493,13 @@ public class XhfManufactureOrderHeaderServiceImpl
           xhfMoDetailService.getByMachinNoAndStartTime(machineNo, beginOfThisWeek);
       BigDecimal r = new BigDecimal(0);
       for (XhfManufactureOrderDetailDO detail : details) {
-        LocalDateTimeUtil.between(detail.getStartTime(), detail.getEndTime()).getSeconds();
+        if (detail.getEndTime() == null) continue;
         r =
             r.add(
                 new BigDecimal(
                         LocalDateTimeUtil.between(detail.getStartTime(), detail.getEndTime())
                             .getSeconds())
-                    .divide(new BigDecimal(3600)));
+                    .divide(new BigDecimal(3600), 3, RoundingMode.HALF_DOWN));
       }
       // 获取当前周 开始的 二个月内的停机计划
       List<XhfMachineDisablePlanDO> plans =
@@ -513,7 +525,7 @@ public class XhfManufactureOrderHeaderServiceImpl
     i.setSpeed(machine.getSpeed());
     i.setSpeedUnit(machine.getSpeedUnit());
     i.setSpeedEfficiency(machine.getEfficiency());
-    i.setMachineParamsId(machine.getMachineParamId());
+    i.setMachineParamsId(machine.getUid());
     i.setStatus(XHFMODetailStatusEnum.TOBE_LOCKED.getNo());
   }
 

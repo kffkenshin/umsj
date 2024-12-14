@@ -180,6 +180,8 @@ public class XhfProductProcessServiceImpl
         each.setInputQty2(each.getInputQty2().multiply(channelsCount));
       }
     }
+    // 最后一道是制袋机
+    routes.get(routes.size() - 1).setWorkStation(XHFWorkStationEnum.ZDJ.getCode());
     // 表头
     result.addValue("额外附加难度", difficulty.setScale(2, RoundingMode.HALF_DOWN) + "");
     result.addValue("投料米数", routes.get(0).getInputQty1().setScale(3, RoundingMode.HALF_DOWN) + "");

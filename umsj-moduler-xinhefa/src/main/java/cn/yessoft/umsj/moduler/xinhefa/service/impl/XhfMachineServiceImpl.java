@@ -7,6 +7,7 @@ import cn.yessoft.umsj.moduler.base.controller.vo.InfoPageQueryReqVO;
 import cn.yessoft.umsj.moduler.xinhefa.entity.XhfMachineDO;
 import cn.yessoft.umsj.moduler.xinhefa.entity.dto.MachineChosenDTO;
 import cn.yessoft.umsj.moduler.xinhefa.mapper.XhfMachineMapper;
+import cn.yessoft.umsj.moduler.xinhefa.service.IXhfDynamicMachineDeterminantService;
 import cn.yessoft.umsj.moduler.xinhefa.service.IXhfMachinePropertyService;
 import cn.yessoft.umsj.moduler.xinhefa.service.IXhfMachineService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -31,6 +32,7 @@ public class XhfMachineServiceImpl extends ServiceImpl<XhfMachineMapper, XhfMach
     implements IXhfMachineService {
   @Resource private XhfMachineMapper xhfMachineMapper;
   @Resource private IXhfMachinePropertyService xhfMachinePropertyService;
+  @Resource private IXhfDynamicMachineDeterminantService xhfDynamicMachineDeterminantService;
   private static Long CAHCE_ID = 1L;
 
   @Getter
@@ -54,6 +56,10 @@ public class XhfMachineServiceImpl extends ServiceImpl<XhfMachineMapper, XhfMach
           machines.put(i.getMachineNo(), i);
         });
     machineChosenDTO.setMachines(machines);
+    // 机台参数
+    machineChosenDTO.setMachineProperties(xhfMachinePropertyService.list());
+    // 选机
+    machineChosenDTO.setDynamicMachineDeterminants(xhfDynamicMachineDeterminantService.list());
     return machineChosenDTO;
   }
 
