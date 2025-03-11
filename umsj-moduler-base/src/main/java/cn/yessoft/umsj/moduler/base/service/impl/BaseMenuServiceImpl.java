@@ -1,5 +1,8 @@
 package cn.yessoft.umsj.moduler.base.service.impl;
 
+import static cn.yessoft.umsj.common.exception.util.ServiceExceptionUtil.exception;
+import static cn.yessoft.umsj.moduler.base.enums.ErrorCodeConstants.DATA_NOT_EXISTS;
+
 import cn.yessoft.umsj.common.pojo.PageResult;
 import cn.yessoft.umsj.common.utils.BeanUtils;
 import cn.yessoft.umsj.moduler.base.controller.vo.menu.MenuQueryReqVO;
@@ -12,14 +15,10 @@ import cn.yessoft.umsj.moduler.base.mapper.BaseMenuMapper;
 import cn.yessoft.umsj.moduler.base.service.IBaseMenuService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import jakarta.annotation.Resource;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 import java.util.Set;
-
-import static cn.yessoft.umsj.common.exception.util.ServiceExceptionUtil.exception;
-import static cn.yessoft.umsj.moduler.base.enums.ErrorCodeConstants.DATA_NOT_EXISTS;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * <p>
@@ -65,7 +64,7 @@ public class BaseMenuServiceImpl extends ServiceImpl<BaseMenuMapper, BaseMenuDO>
         List<BaseMenuDO> menus = baseMenuMapper.listByPermissionsAndParentId(permissions, rootMenuId);
         List<UserMenuDTO> results = BeanUtils.toBean(menus, UserMenuDTO.class);
         results.forEach(i -> {
-            BaseMenuDO e = menus.stream().filter(j -> j.getId().equals(i.getId())).findFirst().get();
+            BaseMenuDO e = menus.stream().filter(j -> j.getId().equals(i.getId())).findFirst().orElse(null);
             UserMenuMetaDTO meta = BeanUtils.toBean(e, UserMenuMetaDTO.class);
             meta.setOrder(e.getSeq());
             i.setMeta(meta);

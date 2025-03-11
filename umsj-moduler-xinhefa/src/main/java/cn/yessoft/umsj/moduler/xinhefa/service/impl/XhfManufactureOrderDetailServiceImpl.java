@@ -1,5 +1,6 @@
 package cn.yessoft.umsj.moduler.xinhefa.service.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.yessoft.umsj.common.utils.BaseUtils;
 import cn.yessoft.umsj.moduler.xinhefa.entity.*;
@@ -105,7 +106,11 @@ public class XhfManufactureOrderDetailServiceImpl
     }
     StringBuilder resultMsg = new StringBuilder();
     List<MoDetailForSchuderDTO> datas = prepareData(tobe.getWorkStation(), tobe.getMachineNo(), 3);
-    schedule(datas, tobe, resultMsg);
+    if (!CollectionUtil.isEmpty(datas)) {
+      schedule(datas, tobe, resultMsg);
+    }
+    // 排完了删除
+    xhfTobeScheduledService.removeById(tobe.getId());
     return resultMsg.toString();
   }
 
@@ -367,6 +372,9 @@ public class XhfManufactureOrderDetailServiceImpl
     LocalDateTime end = start.plusWeeks(weekCount);
     List<XhfManufactureOrderDetailDO> details =
         getDetailsToPlan(workStation, machineNo, start, end);
+    if (BaseUtils.isEmpty(details)) {
+      return datas;
+    }
     Set<Long> headerIds = Sets.newHashSet();
     Set<Long> batchIds = Sets.newHashSet();
     Set<Long> machinePropertIds = Sets.newHashSet();

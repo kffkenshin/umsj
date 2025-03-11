@@ -14,4 +14,5 @@ public interface XHFErrorCodeConstants {
   ErrorCode SO_IS_EMPTY = new ErrorCode(2_001_001_001, "没有选择发货批次");
   ErrorCode MO_MACHINE_IS_EMPTY = new ErrorCode(2_001_002_001, "{}选机为空");
   ErrorCode NO_MACHINE_SPEED = new ErrorCode(2_001_002_002, "机速为空");
+  ErrorCode MO_MACHINE_ERROR = new ErrorCode(2_001_002_003, "{}选机错误,{}");
 }

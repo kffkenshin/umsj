@@ -15,6 +15,7 @@
         <module>umsj-gencode</module>
         <module>umsj-moduler-base</module>
         <module>umsj-moduler-xinhefa</module>
+        <module>umsj-moduler-xmtdkgh</module>
     </modules>
 
     <properties>

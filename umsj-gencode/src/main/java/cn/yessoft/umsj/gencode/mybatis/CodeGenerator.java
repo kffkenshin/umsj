@@ -30,11 +30,11 @@ public class CodeGenerator {
   }
 
   public static void main(String[] args) {
-    String[] ignoreColumns = {"creator", "create_time", "update_time", "updater"};
+    String[] ignoreColumns = {"creator", "create_time", "update_time", "updater", "id"};
     AutoGenerator generator = new AutoGenerator(DATA_SOURCE_CONFIG);
     generator.strategy(
         strategyConfig()
-            .addInclude("xhf_tobe_scheduled")
+            .addInclude("xhf_item")
             .controllerBuilder()
             .enableRestStyle()
             .entityBuilder()

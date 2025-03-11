@@ -22,4 +22,6 @@ public interface IXhfManufactureOrderHeaderService extends IService<XhfManufactu
   String initMo();
 
   List<XhfManufactureOrderHeaderDO> getHeadersByStatus(String no);
+
+  void reinitMO();
 }

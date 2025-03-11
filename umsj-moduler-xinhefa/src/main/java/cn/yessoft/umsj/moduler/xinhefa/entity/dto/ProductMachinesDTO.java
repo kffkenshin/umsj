@@ -18,7 +18,10 @@ public class ProductMachinesDTO {
     if (firstMachine != null && firstMachine.getMachineNo().equals(machinNo)) {
       return firstMachine;
     }
-    return secondMachines.stream().filter(i -> i.getMachineNo().equals(machinNo)).findFirst().get();
+    return secondMachines.stream()
+        .filter(i -> i.getMachineNo().equals(machinNo))
+        .findFirst()
+        .orElse(null);
   }
 
   public Boolean hasFirst() {

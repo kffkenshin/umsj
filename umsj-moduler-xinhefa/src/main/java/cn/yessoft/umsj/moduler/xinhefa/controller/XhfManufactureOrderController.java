@@ -42,4 +42,10 @@ public class XhfManufactureOrderController {
     PageResult<MoHeaderDTO> pageResult = xhfMoHeaderService.pagedQuery(reqVO);
     return success(pageResult);
   }
+
+  @PostMapping("/header/reinitMO")
+  public ApiResult<String> reinitMO() {
+    xhfMoHeaderService.reinitMO();
+    return success("ok");
+  }
 }

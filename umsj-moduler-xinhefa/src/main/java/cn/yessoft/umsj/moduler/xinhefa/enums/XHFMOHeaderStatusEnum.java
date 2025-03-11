@@ -1,5 +1,6 @@
 package cn.yessoft.umsj.moduler.xinhefa.enums;
 
+import cn.hutool.core.util.ArrayUtil;
 import cn.yessoft.umsj.common.pojo.EnumSelector;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,5 +24,9 @@ public enum XHFMOHeaderStatusEnum {
       selectors.add(new EnumSelector(e.getNo(), e.getName()));
     }
     return selectors;
+  }
+
+  public static XHFMOHeaderStatusEnum valueof(String no) {
+    return ArrayUtil.firstMatch(e -> e.getNo().equals(no), XHFMOHeaderStatusEnum.values());
   }
 }

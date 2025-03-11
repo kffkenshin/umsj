@@ -1,6 +1,8 @@
 package cn.yessoft.umsj.moduler.xinhefa.entity;
 
 import cn.yessoft.umsj.mybatis.core.entity.BaseDO;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -21,6 +23,7 @@ public class XhfManufactureOrderHeaderDO extends BaseDO {
   private static final long serialVersionUID = 1L;
 
   /** ID */
+  @TableId(type = IdType.AUTO)
   private Long id;
 
   /** 生产产品 */

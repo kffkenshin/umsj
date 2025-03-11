@@ -1,8 +1,7 @@
 package cn.yessoft.umsj.moduler.xinhefa.service.impl;
 
 import static cn.yessoft.umsj.common.exception.util.ServiceExceptionUtil.exception;
-import static cn.yessoft.umsj.moduler.xinhefa.enums.XHFErrorCodeConstants.MO_MACHINE_IS_EMPTY;
-import static cn.yessoft.umsj.moduler.xinhefa.enums.XHFErrorCodeConstants.SO_IS_EMPTY;
+import static cn.yessoft.umsj.moduler.xinhefa.enums.XHFErrorCodeConstants.*;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.date.LocalDateTimeUtil;
@@ -20,7 +19,6 @@ import cn.yessoft.umsj.moduler.xinhefa.utils.XHFUtils;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.google.common.util.concurrent.UncheckedExecutionException;
 import jakarta.annotation.Resource;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -189,6 +187,7 @@ public class XhfManufactureOrderHeaderServiceImpl
                   XHFUtils.getProductUnitConvert(
                       i.getItemGWeight(), i.getItemLength(), i.getPurchasingNuit(), i.getQty()));
               List<MoHeaderDTO> children = Lists.newArrayList();
+              i.setApsStatusStr(XHFMOHeaderStatusEnum.valueof(i.getApsStatus()).getName());
               // 该订单头的批次
               List<XhfManufactureOrderBatchDO> ibatchs =
                   batchs.stream()
@@ -295,6 +294,26 @@ public class XhfManufactureOrderHeaderServiceImpl
     if (headers.isEmpty()) {
       return resultMsg.toString();
     }
+    resultMsg.append(initMoByHeaders(headers));
+    return resultMsg.toString();
+  }
+
+  /** 异常维护 找出异常状态的工单后重新生成工单 */
+  @Override
+  @Transactional
+  public void reinitMO() {
+    StringBuilder resultMsg = new StringBuilder();
+    List<XhfManufactureOrderHeaderDO> headers =
+        getHeadersByStatus(XHFMOHeaderStatusEnum.ERROR1.getNo());
+    if (headers.isEmpty()) {
+      return;
+    }
+    initMoByHeaders(headers);
+  }
+
+  /** 工单选机 */
+  private String initMoByHeaders(List<XhfManufactureOrderHeaderDO> headers) {
+    StringBuilder resultMsg = new StringBuilder();
     List<Long> headerIds = Lists.newArrayList();
     headers.forEach(i -> headerIds.add(i.getId()));
     List<XhfManufactureOrderDetailDO> details = xhfMoDetailService.getByHeaderIds(headerIds);
@@ -310,11 +329,6 @@ public class XhfManufactureOrderHeaderServiceImpl
                 moDTO.getDetails().get(0).getMachineNumber(),
                 XHFSchedulerModeEnum.B.getModeNo());
             sendT100Mo(moDTO);
-          } catch (UncheckedExecutionException ex) {
-            ex.printStackTrace();
-            moDTO.getHeader().setStatus(XHFMOHeaderStatusEnum.ERROR1.getNo());
-            moDTO.getHeader().setRemark(ex.getCause().getMessage());
-            moDTO.setMsg(ex.getMessage());
           } catch (Exception ex) {
             ex.printStackTrace();
             moDTO.getHeader().setStatus(XHFMOHeaderStatusEnum.ERROR1.getNo());
@@ -350,13 +364,25 @@ public class XhfManufactureOrderHeaderServiceImpl
     XhfItemDO item = xhfItemService.getById(mo.getHeader().getItemId());
     for (XhfManufactureOrderDetailDO i : mo.getDetails()) {
       String key = BaseUtils.toString(i.getWorkStation());
-      if (XHFWorkStationEnum.ZDJ.getCode() == i.getWorkStation()) {
+      if (Objects.equals(XHFWorkStationEnum.ZDJ.getCode(), i.getWorkStation())) {
         key = key + "-" + zdxMachinNo;
       }
       ProductMachinesDTO availableMachines = machinesFit.get(key);
       if (availableMachines == null) {
         throw exception(
             MO_MACHINE_IS_EMPTY, XHFWorkStationEnum.valueOf(i.getWorkStation()).getName());
+      }
+      // 如果有上次的机台 直接选
+      if (hasLast(i, item)) {
+        MachineParamsDTO m = availableMachines.getMachineParamsDTO(i.getMachineNumber());
+        if (BaseUtils.isEmpty(m)) {
+          throw exception(
+              MO_MACHINE_ERROR,
+              XHFWorkStationEnum.valueOf(i.getWorkStation()).getName(),
+              i.getMachineNumber() + "不在可选机台列表里");
+        }
+        fillSpeedParams(i, availableMachines.getMachineParamsDTO(i.getMachineNumber()));
+        continue;
       }
       // 卷数
       BigDecimal rollCount =
@@ -418,6 +444,61 @@ public class XhfManufactureOrderHeaderServiceImpl
       }
     }
     mo.getDetails().addAll(addition); // 拆出来的加进去
+  }
+
+  private boolean hasLast(XhfManufactureOrderDetailDO i, XhfItemDO item) {
+    boolean r = false;
+    switch (XHFWorkStationEnum.valueOf(i.getWorkStation())) {
+      case YS -> {
+        if (BaseUtils.isNotEmpty(item.getLastMachineYs())) {
+          i.setMachineNumber(item.getLastMachineYs());
+          r = true;
+        }
+      }
+      case PM -> {
+        if (BaseUtils.isNotEmpty(item.getLastMachinePm())) {
+          i.setMachineNumber(item.getLastMachinePm());
+          r = true;
+        }
+      }
+      case FH -> {
+        if (BaseUtils.isNotEmpty(item.getLastMachineFh())) {
+          i.setMachineNumber(item.getLastMachineFh());
+          r = true;
+        }
+      }
+      case JM -> {
+        if (BaseUtils.isNotEmpty(item.getLastMachineJm())) {
+          i.setMachineNumber(item.getLastMachineJm());
+          r = true;
+        }
+      }
+      case TJ -> {
+        if (BaseUtils.isNotEmpty(item.getLastMachineTj())) {
+          i.setMachineNumber(item.getLastMachineTj());
+          r = true;
+        }
+      }
+      case KM -> {
+        if (BaseUtils.isNotEmpty(item.getLastMachineKm())) {
+          i.setMachineNumber(item.getLastMachineKm());
+          r = true;
+        }
+      }
+      case ZDX -> {
+        if (BaseUtils.isNotEmpty(item.getLastMachineZx())) {
+          i.setMachineNumber(item.getLastMachineZx());
+          r = true;
+        }
+      }
+      case ZDJ -> {
+        if (BaseUtils.isNotEmpty(item.getLastMachineZj())) {
+          i.setMachineNumber(item.getLastMachineZj());
+          r = true;
+        }
+      }
+    }
+    return r;
   }
 
   private void chooseOne(

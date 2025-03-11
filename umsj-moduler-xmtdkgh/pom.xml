@@ -7,11 +7,10 @@
         <version>0.0.1-snapshot</version>
     </parent>
 
-    <artifactId>umsj-moduler-xinhefa</artifactId>
+    <artifactId>umsj-moduler-xmtdkgh</artifactId>
     <packaging>jar</packaging>
 
-    <name>umsj-moduler-xinhefa</name>
-    <url>http://maven.apache.org</url>
+    <name>umsj-moduler-xmtdkgh</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -63,12 +62,6 @@
             <groupId>cn.yes-soft</groupId>
             <artifactId>umsj-moduler-base</artifactId>
             <version>0.0.1-snapshot</version>
-        </dependency>
-        <!-- Oracle JDBC driver -->
-        <dependency>
-            <groupId>com.oracle.database.jdbc</groupId>
-            <artifactId>ojdbc8</artifactId>
-            <version>19.3.0.0</version>
         </dependency>
     </dependencies>
     <build>

@@ -120,4 +120,28 @@ public class XhfItemDO extends BaseDO {
   private String secondMachine;
 
   private String thirdMachine;
+
+  /** 印刷上次选机 */
+  private String lastMachineYs;
+
+  /** 喷码上次选机 */
+  private String lastMachinePm;
+
+  /** 复合上次选机 */
+  private String lastMachineFh;
+
+  /** 检码上次选机 */
+  private String lastMachineJm;
+
+  /** 烫金上次选机 */
+  private String lastMachineTj;
+
+  /** 刻码上次选机 */
+  private String lastMachineKm;
+
+  /** 制线上次选机 */
+  private String lastMachineZx;
+
+  /** 制机上次选机 */
+  private String lastMachineZj;
 }

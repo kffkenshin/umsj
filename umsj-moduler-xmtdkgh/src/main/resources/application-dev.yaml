@@ -1,0 +1,43 @@
+server:
+  port: 8084
+--- #################### 数据库相关配置 ####################
+spring:
+  main:
+    allow-circular-references: true
+  application:
+    name: umsj-tdkgh
+  # 数据源配置项
+  datasource:
+    name: tdk-gh
+    url: jdbc:mysql://192.168.50.46:13606/${spring.datasource.name}?characterEncoding=UTF-8
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: qianlu
+    password: test!2213
+    hikari:
+      connection-timeout: 60000
+      validation-timeout: 3000
+      idle-timeout: 60000
+      login-timeout: 5
+      max-lifetime: 60000
+      maximum-pool-size: 10
+      minimum-idle: 10
+      read-only: false
+
+--- #################### token相关配置 ####################
+yesee:
+  base:
+    # token过期时间 秒
+    access-token-expire-time: 18000000
+    refresh-token-expire-time: 2592000
+    # 新建用户/密码初始化的 默认密码
+    default-password: "123456"
+    # 是否开启定时器  ON是开
+    job-scheduler: "ON"
+--- #################### mybatis-plus ####################
+mybatis-plus-join:
+  banner: false
+mybatis-plus:
+  global-config:
+    banner: false
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
