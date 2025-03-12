@@ -7,12 +7,23 @@ import com.baomidou.mybatisplus.generator.config.PackageConfig;
 import com.baomidou.mybatisplus.generator.config.StrategyConfig;
 
 public class CodeGenerator {
+  // 本地 xinhefa
+  //  public static String DATABASE_URL =
+  //      "jdbc:mysql://localhost:3306/umsj?serverTimezone=Asia/Shanghai";
+  //  public static String USERNAME = "root";
+  //  public static String PASSWORD = "root";
+  //  public static String DATABASENAME = "umsj";
+
+  // 测试环境 tdk工会
+  public static String DATABASE_URL =
+      "jdbc:mysql://192.168.50.46:13606/tdk-gh?serverTimezone=Asia/Shanghai";
+  public static String USERNAME = "qianlu";
+  public static String PASSWORD = "test!2213";
+  public static String DATABASENAME = "tdk-gh";
+
   /** 数据源配置 */
   private static final DataSourceConfig DATA_SOURCE_CONFIG =
-      new DataSourceConfig.Builder(
-              "jdbc:mysql://localhost:3306/umsj?serverTimezone=Asia/Shanghai", "root", "root")
-          .schema("umsj")
-          .build();
+      new DataSourceConfig.Builder(DATABASE_URL, USERNAME, PASSWORD).schema(DATABASENAME).build();
 
   /** 策略配置 */
   protected static StrategyConfig.Builder strategyConfig() {
