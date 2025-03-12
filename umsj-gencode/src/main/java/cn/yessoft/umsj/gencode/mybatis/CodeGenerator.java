@@ -14,7 +14,7 @@ public class CodeGenerator {
   //  public static String PASSWORD = "root";
   //  public static String DATABASENAME = "umsj";
 
-  // 测试环境 tdk工会
+  // 测试环境 tdk工会2
   public static String DATABASE_URL =
       "jdbc:mysql://192.168.50.46:13606/tdk-gh?serverTimezone=Asia/Shanghai";
   public static String USERNAME = "qianlu";
